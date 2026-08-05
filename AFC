@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AFC Life Science Indonesia - Official Distributor Japan</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans & Noto Serif JP -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Three.js CDN untuk Animasi 3D Interaktif -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- GSAP & ScrollTrigger CDN untuk Animasi Scroll Smooth -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        afcNavy: '#0C2340',
+                        afcGold: '#D4AF37',
+                        afcGoldHover: '#B89628',
+                        japanRed: '#BC002D',
+                        lightBg: '#F8FAFC',
+                        softGold: '#FFFDF0'
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        serif: ['"Noto Serif JP"', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Glassmorphism Header Cerah */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+        }
+
+        .gold-glow {
+            box-shadow: 0 10px 30px -5px rgba(212, 175, 55, 0.3);
+        }
+
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(12, 35, 64, 0.08);
+        }
+
+        /* Hide Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Custom Scrollbar Modal */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #D4AF37; }
+    </style>
+</head>
+<body class="bg-lightBg font-sans text-slate-800 antialiased selection:bg-afcGold selection:text-white">
+
+    <!-- HEADER & NAVBAR CERAH -->
+    <header class="fixed top-0 left-0 w-full glass-header z-40 shadow-sm transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Logo Brand -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 border-2 border-afcGold rounded-full flex items-center justify-center bg-white shadow-sm group-hover:scale-105 transition">
+                    <i class="fa-solid fa-heart-pulse text-japanRed text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-2xl font-black tracking-wider text-afcNavy font-serif block leading-none">
+                        AFC<span class="text-afcGold text-xs font-semibold block tracking-widest mt-0.5 font-sans">LIFESCIENCE</span>
+                    </span>
+                </div>
+            </a>
+
+            <!-- Nav Links -->
+            <nav class="hidden lg:flex items-center gap-5 text-xs font-bold uppercase tracking-wider text-slate-700">
+                <a href="#beranda" class="hover:text-afcGold transition py-1 text-afcNavy">Beranda</a>
+                <button onclick="app.modalController.openAboutModal()" class="hover:text-afcGold transition py-1 uppercase font-bold text-slate-700">Tentang Kami</button>
+                <button onclick="app.modalController.openCareModal()" class="hover:text-afcGold transition py-1 text-japanRed uppercase flex items-center gap-1 font-extrabold">
+                    <i class="fa-solid fa-hand-holding-heart"></i> AFC Peduli
+                </button>
+                <a href="#produk" class="hover:text-afcGold transition py-1">Produk</a>
+                <a href="#berita" class="hover:text-afcGold transition py-1">Berita</a>
+                <a href="#kontak" class="hover:text-afcGold transition py-1">Masuk</a>
+                
+                <!-- ID / EN Selector -->
+                <div class="flex items-center gap-1 border-l border-slate-300 pl-3 text-[11px] font-black">
+                    <span class="text-japanRed cursor-pointer">ID</span>
+                    <span class="text-slate-300">|</span>
+                    <span class="text-slate-400 hover:text-slate-600 cursor-pointer">EN</span>
+                </div>
+            </nav>
+
+            <!-- CTA Header & Shopping Cart Button -->
+            <div class="flex items-center gap-3">
+                <button onclick="app.cartController.toggleDrawer(true)" class="relative bg-amber-50 hover:bg-amber-100 text-afcNavy p-2.5 rounded-full border border-afcGold/40 transition">
+                    <i class="fa-solid fa-bag-shopping text-base text-afcNavy"></i>
+                    <span id="headerCartBadge" class="absolute -top-1 -right-1 bg-japanRed text-white text-[10px] font-extrabold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+                </button>
+
+                <a href="https://wa.me/628115994455?text=Halo%20AFC%20Lifescience,%20saya%20ingin%20konsultasi%20gratis" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-afcGold to-amber-500 hover:from-amber-500 hover:to-afcGold text-white font-extrabold px-5 py-2.5 rounded-full text-xs uppercase tracking-wider shadow-md transition transform active:scale-95">
+                    <i class="fa-brands fa-whatsapp text-sm"></i> Konsultasi Gratis
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 1. HERO SECTION CERAH -->
+    <section id="beranda" class="relative pt-28 pb-20 bg-gradient-to-b from-amber-50/60 via-white to-lightBg overflow-hidden min-h-[92vh] flex items-center">
+        
+        <!-- THREE.JS 3D CANVAS BACKGROUND OVERLAY -->
+        <div id="hero-3d-canvas" class="absolute inset-0 z-0 pointer-events-none opacity-60"></div>
+
+        <!-- Gambar Latar Belakang Gunung Fuji -->
+        <div class="absolute inset-0 z-0 opacity-15 bg-cover bg-center pointer-events-none" style="background-image: url('https://i.ibb.co.com/5XT7RrRd/file-00000000a92081faba9a169b6fd269a4.png');"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-12 gap-8 items-center relative z-10">
+            
+            <!-- Deskripsi Utama Hero -->
+            <div class="lg:col-span-6 space-y-6 text-left hero-content-gsap">
+                <div class="inline-flex items-center gap-2 bg-white border border-afcGold/40 px-4 py-1.5 rounded-full text-xs font-bold text-afcNavy uppercase tracking-wider shadow-sm">
+                    <img src="https://flagcdn.com/w20/jp.png" alt="Japan Flag" class="w-4 h-3 inline rounded-xs"> Made in Japan • Official Supplement
+                </div>
+
+                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-serif font-black text-afcNavy leading-tight">
+                    Inovasi Nutrisi <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-afcGold via-amber-600 to-japanRed">
+                        Peptide Terbaik Jepang
+                    </span>
+                </h1>
+
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed font-normal max-w-xl">
+                    Nutrisi kesehatan seluler dengan paten fungsi teruji secara klinis dari pabrik AFC-HD AMS Life Science Japan untuk meningkatkan kualitas hidup keluarga Anda.
+                </p>
+
+                <!-- Tombol CTA Hero -->
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                    <a href="#produk" class="bg-afcNavy hover:bg-slate-800 text-white font-extrabold px-6 py-3.5 rounded-xl text-xs uppercase tracking-wider shadow-lg transition flex items-center gap-2">
+                        <i class="fa-solid fa-boxes-packing text-afcGold"></i> Lihat Produk Kami
+                    </a>
+                    <button onclick="app.modalController.openCareModal()" class="bg-japanRed hover:bg-rose-800 text-white font-bold px-6 py-3.5 rounded-xl text-xs tracking-wider transition flex items-center gap-2 shadow-md">
+                        <i class="fa-solid fa-hand-holding-heart"></i> AFC Peduli (CSR)
+                    </button>
+                    <button onclick="app.modalController.openAboutModal()" class="bg-white border border-slate-300 hover:border-afcGold text-slate-700 font-semibold px-5 py-3.5 rounded-xl text-xs tracking-wider transition flex items-center gap-2 shadow-sm">
+                        <i class="fa-solid fa-building text-japanRed"></i> Profil Perusahaan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Visual Showcase Produk Unggulan -->
+            <div class="lg:col-span-6 relative flex justify-center items-center mt-8 lg:mt-0 hero-card-gsap">
+                <div class="relative w-full max-w-xl border border-afcGold/30 rounded-3xl p-6 bg-white/80 backdrop-blur-md shadow-2xl">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-center hover:border-afcGold transition">
+                            <img src="https://i.ibb.co.com/DXk9ZRh/dbb246d9-e999-4b57-832e-0d66131d4788.webp" alt="SOP Subarashi" class="h-28 mx-auto object-contain mb-2">
+                            <h4 class="font-serif font-bold text-xs text-afcNavy">SOP Subarashi</h4>
+                            <p class="text-[10px] text-amber-600 font-semibold">Triple Peptide</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-center hover:border-afcGold transition">
+                            <img src="https://i.ibb.co.com/N6g1NWCR/0e975c36-0557-4ab9-bfc8-4bc9073956bf-1024x1024.webp" alt="Utsukushhii" class="h-28 mx-auto object-contain mb-2">
+                            <h4 class="font-serif font-bold text-xs text-afcNavy">Utsukushhii Gold</h4>
+                            <p class="text-[10px] text-purple-600 font-semibold">Salmon DNA & Probiotics</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-center hover:border-afcGold transition">
+                            <img src="https://i.ibb.co.com/vv43FJ3K/IMG-20260805-014907.jpg" alt="Hikari" class="h-28 mx-auto object-contain mb-2">
+                            <h4 class="font-serif font-bold text-xs text-afcNavy">Hikari Superfood</h4>
+                            <p class="text-[10px] text-rose-600 font-semibold">Mata & Fungsi Otak</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-center hover:border-afcGold transition">
+                            <img src="https://i.ibb.co.com/4nTWzv9y/ced87d9eadbd5ce775faa2bdd51d22d0.jpg" alt="Sensei Suru" class="h-28 mx-auto object-contain mb-2">
+                            <h4 class="font-serif font-bold text-xs text-afcNavy">Sensei Suru</h4>
+                            <p class="text-[10px] text-emerald-600 font-semibold">Regenerative Serum</p>
+                        </div>
+                    </div>
+
+                    <!-- Badge Japan Quality -->
+                    <div class="absolute -bottom-4 right-6 bg-japanRed text-white text-[10px] font-extrabold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg border border-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-award"></i> 100% Import Japan
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    <!-- 2. STATISTIK PERUSAHAAN -->
+    <section class="bg-white border-y border-slate-200 py-8 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center gsap-stat-box">
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="text-2xl sm:text-3xl font-serif font-black text-afcNavy">1969</div>
+                <div class="text-xs font-semibold text-slate-500 mt-1">Tahun Berdiri AFC Japan</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="text-2xl sm:text-3xl font-serif font-black text-afcGold">400+</div>
+                <div class="text-xs font-semibold text-slate-500 mt-1">Klien Internasional</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="text-2xl sm:text-3xl font-serif font-black text-afcNavy">10.000+</div>
+                <div class="text-xs font-semibold text-slate-500 mt-1">Produk Donasi CSR</div>
+            </div>
+            <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                <div class="text-2xl sm:text-3xl font-serif font-black text-japanRed">1.000.000+</div>
+                <div class="text-xs font-semibold text-slate-500 mt-1">Produk Terjual di Indonesia</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. TENTANG KAMI SECTION -->
+    <section id="tentang" class="py-20 bg-lightBg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-12 gap-12 items-center">
+                <div class="lg:col-span-6 space-y-5 gsap-about-text">
+                    <span class="bg-amber-100 text-afcNavy text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest">Profil Perusahaan</span>
+                    <h2 class="text-3xl font-serif font-bold text-afcNavy">Asayama Family Club (AFC Japan)</h2>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        AFC merupakan singkatan dari <strong>Asayama Family Club</strong>. AFC Japan didirikan oleh Asayama Tadahiko setelah mengumpulkan pengalaman penjualan dan perdagangan selama bertahun-tahun. Beliau bekerja keras untuk membangun sistem produksi yang komprehensif dan beroperasi dengan 4 Prinsip Utama: Standar Kualitas, Keterjangkauan, Peningkatan Kesadaran, dan Tanggung Jawab Sosial.
+                    </p>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        AFC Life Science hadir di Indonesia sebagai distributor resmi AFC Jepang dan merupakan salah satu perusahaan Direct Selling terbesar dan terpercaya dengan komitmen menyediakan All Natural Supplement bermutu tinggi.
+                    </p>
+                    <div class="pt-2">
+                        <button onclick="app.modalController.openAboutModal()" class="bg-afcGold hover:bg-afcGoldHover text-white font-bold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2">
+                            <i class="fa-solid fa-circle-info"></i> Baca Selengkapnya Profil AFC
+                        </button>
+                    </div>
+                </div>
+                <div class="lg:col-span-6 grid grid-cols-2 gap-4 gsap-about-grid">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 card-shadow space-y-2">
+                        <i class="fa-solid fa-award text-2xl text-afcGold"></i>
+                        <h4 class="font-bold text-sm text-afcNavy">GMP Certified</h4>
+                        <p class="text-xs text-slate-500">Perusahaan suplemen pertama yang diberikan sertifikasi GMP di Jepang.</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 card-shadow space-y-2">
+                        <i class="fa-solid fa-building-columns text-2xl text-afcGold"></i>
+                        <h4 class="font-bold text-sm text-afcNavy">Listed Stock Market</h4>
+                        <p class="text-xs text-slate-500">Terdaftar secara resmi di bursa saham Jepang (AFC-HD AMS Life Science).</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 card-shadow space-y-2">
+                        <i class="fa-solid fa-vial-circle-check text-2xl text-afcGold"></i>
+                        <h4 class="font-bold text-sm text-afcNavy">Honzo Pharmaceutical</h4>
+                        <p class="text-xs text-slate-500">Divisi herbal yang berdiri sejak tahun 1831 (Lebih dari 170 tahun).</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 card-shadow space-y-2">
+                        <i class="fa-solid fa-trophy text-2xl text-japanRed"></i>
+                        <h4 class="font-bold text-sm text-afcNavy">3 Rekor MURI</h4>
+                        <p class="text-xs text-slate-500">Memenangkan 3 Penghargaan Rekor MURI Resmi di Indonesia.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 4. KEUNGGULAN PERUSAHAAN -->
+    <section id="keunggulan" class="py-16 bg-white border-y border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 gsap-header-anim">
+                <span class="bg-amber-100 text-afcNavy text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest">Why Choose Us</span>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-afcNavy mt-2">Keunggulan Utama AFC Life Science</h2>
+            </div>
+            <div class="grid md:grid-cols-5 gap-4 gsap-advantages-grid">
+                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-3">
+                    <div class="w-12 h-12 rounded-full bg-amber-100 text-afcGold flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <h3 class="font-bold text-sm text-afcNavy">Profesional</h3>
+                    <p class="text-xs text-slate-500">Didukung oleh tim ilmuwan R&D terkemuka dari Jepang.</p>
+                </div>
+                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-3">
+                    <div class="w-12 h-12 rounded-full bg-amber-100 text-afcGold flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <h3 class="font-bold text-sm text-afcNavy">Berpengalaman</h3>
+                    <p class="text-xs text-slate-500">Pengalaman riset nutrisi seluler lebih dari 50 tahun.</p>
+                </div>
+                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-3">
+                    <div class="w-12 h-12 rounded-full bg-amber-100 text-afcGold flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <h3 class="font-bold text-sm text-afcNavy">Tepat Waktu</h3>
+                    <p class="text-xs text-slate-500">Pengiriman cepat & terjamin aman ke seluruh Indonesia.</p>
+                </div>
+                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-3">
+                    <div class="w-12 h-12 rounded-full bg-amber-100 text-afcGold flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="font-bold text-sm text-afcNavy">Bergaransi Paten</h3>
+                    <p class="text-xs text-slate-500">Memiliki paten fungsi teruji secara klinis internasional.</p>
+                </div>
+                <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200 text-center space-y-3">
+                    <div class="w-12 h-12 rounded-full bg-amber-100 text-afcGold flex items-center justify-center mx-auto text-xl">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <h3 class="font-bold text-sm text-afcNavy">Support Cepat</h3>
+                    <p class="text-xs text-slate-500">Layanan konsultasi kesehatan gratis setiap hari.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- 4. PRODUK & LAYANAN UNGGULAN -->
+    <section id="produk" class="py-20 bg-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-afcNavy uppercase tracking-wider">PRODUK UNGGULAN KAMI</h2>
+                <p class="text-slate-500 mt-1 text-xs sm:text-sm">Nutrisi fungsional berpaten klinis resmi untuk kesehatan optimal</p>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- CARD 1: SOP SUBARASHI -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between">
+                    <div class="p-5">
+                        <div class="bg-slate-50 rounded-xl p-4 text-center mb-4 border border-slate-100 relative">
+                            <span class="absolute top-2 left-2 bg-amber-500 text-white text-[9px] font-bold px-2 py-0.5 rounded">BEST SELLER</span>
+                            <img src="https://i.ibb.co.com/DXk9ZRh/dbb246d9-e999-4b57-832e-0d66131d4788.webp" alt="SOP Subarashi" class="h-44 mx-auto object-contain">
+                        </div>
+                        <h3 class="text-base font-bold text-afcNavy">SOP SUBARASHI</h3>
+                        <p class="text-[11px] text-slate-500 mb-3">World First Triple Peptide Formulation</p>
+                        <div class="text-lg font-extrabold text-afcNavy mb-4">Rp 1.950.000</div>
+                    </div>
+                    <div class="p-5 pt-0 space-y-2">
+                        <button onclick="app.cartController.addItem({ id: 'P01', name: 'SOP Subarashi', price: 1950000 })" class="w-full bg-afcNavy hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Tambah Ke Keranjang
+                        </button>
+                        <button onclick="app.modalController.openDetail('P01')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-xs transition">
+                            Lihat Detail Manfaat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CARD 2: UTSUKUSHHII -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between">
+                    <div class="p-5">
+                        <div class="bg-slate-50 rounded-xl p-4 text-center mb-4 border border-slate-100 relative">
+                            <span class="absolute top-2 left-2 bg-purple-600 text-white text-[9px] font-bold px-2 py-0.5 rounded">PATENTED</span>
+                            <img src="https://i.ibb.co.com/N6g1NWCR/0e975c36-0557-4ab9-bfc8-4bc9073956bf-1024x1024.webp" alt="Utsukushhii" class="h-44 mx-auto object-contain">
+                        </div>
+                        <h3 class="text-base font-bold text-afcNavy">UTSUKUSHHII GOLD</h3>
+                        <p class="text-[11px] text-slate-500 mb-3">Salmon DNA & 1 Triliun Probiotik Usus</p>
+                        <div class="text-lg font-extrabold text-afcNavy mb-4">Rp 1.800.000</div>
+                    </div>
+                    <div class="p-5 pt-0 space-y-2">
+                        <button onclick="app.cartController.addItem({ id: 'P03', name: 'Utsukushhii Gold', price: 1800000 })" class="w-full bg-purple-800 hover:bg-purple-900 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Tambah Ke Keranjang
+                        </button>
+                        <button onclick="app.modalController.openDetail('P03')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-xs transition">
+                            Lihat Detail Manfaat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CARD 3: HIKARI -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between">
+                    <div class="p-5">
+                        <div class="bg-slate-50 rounded-xl p-4 text-center mb-4 border border-slate-100 relative">
+                            <span class="absolute top-2 left-2 bg-rose-600 text-white text-[9px] font-bold px-2 py-0.5 rounded">EYE & BRAIN</span>
+                            <img src="https://i.ibb.co.com/vv43FJ3K/IMG-20260805-014907.jpg" alt="Hikari" class="h-44 mx-auto object-contain">
+                        </div>
+                        <h3 class="text-base font-bold text-afcNavy">HIKARI SUPERFOOD</h3>
+                        <p class="text-[11px] text-slate-500 mb-3">Perlindungan Mata & Fungsi Kognitif</p>
+                        <div class="text-lg font-extrabold text-afcNavy mb-4">Rp 1.900.000</div>
+                    </div>
+                    <div class="p-5 pt-0 space-y-2">
+                        <button onclick="app.cartController.addItem({ id: 'P02', name: 'Hikari Superfood', price: 1900000 })" class="w-full bg-rose-700 hover:bg-rose-800 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Tambah Ke Keranjang
+                        </button>
+                        <button onclick="app.modalController.openDetail('P02')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-xs transition">
+                            Lihat Detail Manfaat
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CARD 4: SENSEI SURU -->
+                <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-xl transition duration-300 flex flex-col justify-between">
+                    <div class="p-5">
+                        <div class="bg-slate-50 rounded-xl p-4 text-center mb-4 border border-slate-100 relative">
+                            <span class="absolute top-2 left-2 bg-emerald-600 text-white text-[9px] font-bold px-2 py-0.5 rounded">NANO SERUM</span>
+                            <img src="https://i.ibb.co.com/4nTWzv9y/ced87d9eadbd5ce775faa2bdd51d22d0.jpg" alt="Sensei Suru" class="h-44 mx-auto object-contain">
+                        </div>
+                        <h3 class="text-base font-bold text-afcNavy">SENSEI SURU</h3>
+                        <p class="text-[11px] text-slate-500 mb-3">Regenerative Nano Peptide Serum</p>
+                        <div class="text-lg font-extrabold text-afcNavy mb-4">Rp 3.500.000</div>
+                    </div>
+                    <div class="p-5 pt-0 space-y-2">
+                        <button onclick="app.cartController.addItem({ id: 'P04', name: 'Sensei Suru Serum', price: 3500000 })" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Tambah Ke Keranjang
+                        </button>
+                        <button onclick="app.modalController.openDetail('P04')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 rounded-xl text-xs transition">
+                            Lihat Detail Manfaat
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. BERITA & CSR SECTION DISPLAY -->
+    <section id="berita" class="py-16 bg-white border-y border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gsap-header-anim">
+                <div>
+                    <span class="bg-japanRed/10 text-japanRed text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest">AFC Care & CSR</span>
+                    <h2 class="text-2xl sm:text-3xl font-serif font-bold text-afcNavy mt-2">Dampak Positif Bagi Indonesia</h2>
+                </div>
+                <button onclick="app.modalController.openCareModal()" class="mt-4 md:mt-0 text-xs font-bold text-japanRed hover:underline flex items-center gap-1">
+                    Lihat Semua Program CSR <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <!-- GALERI FOTO AFC CARE (NEW) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                <a href="https://ibb.co.com/TDQnpQZF" target="_blank" rel="noopener" class="block overflow-hidden rounded-2xl shadow-md border border-slate-200 group">
+                    <img src="https://i.ibb.co.com/KctQRtY3/batuputih.jpg" alt="batuputih" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300" />
+                </a>
+                <a href="https://ibb.co.com/WvY7HbRj" target="_blank" rel="noopener" class="block overflow-hidden rounded-2xl shadow-md border border-slate-200 group">
+                    <img src="https://i.ibb.co.com/qYPhDt2V/kolonel-simon.jpg" alt="kolonel-simon" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300" />
+                </a>
+                <a href="https://ibb.co.com/BHcx6nSG" target="_blank" rel="noopener" class="block overflow-hidden rounded-2xl shadow-md border border-slate-200 group">
+                    <img src="https://i.ibb.co.com/LDYWgN2r/afc-care.jpg" alt="afc-care" class="w-full h-48 object-cover group-hover:scale-105 transition duration-300" />
+                </a>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 gsap-csr-grid">
+                <!-- Highlight 1 -->
+                <div class="p-6 bg-amber-50/50 border border-amber-200 rounded-2xl space-y-3">
+                    <div class="w-10 h-10 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-hospital-user"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-afcNavy">AFC Health Centre Lombok</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Pembangunan Health Centre pertama kami di Lombok untuk membantu meningkatkan kualitas kesehatan masyarakat secara berkelanjutan.
+                    </p>
+                </div>
+                <!-- Highlight 2 -->
+                <div class="p-6 bg-blue-50/50 border border-blue-200 rounded-2xl space-y-3">
+                    <div class="w-10 h-10 rounded-full bg-blue-600/10 text-blue-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-faucet-drip"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-afcNavy">Pengeboran Mata Air NTT</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Kerjasama dengan Kolonel CPL Simon Petrus Kamlasi untuk pengeboran mata air di daerah kekeringan seperti Jawa Barat & Kota Soe (NTT).
+                    </p>
+                </div>
+                <!-- Highlight 3 -->
+                <div class="p-6 bg-rose-50/50 border border-rose-200 rounded-2xl space-y-3">
+                    <div class="w-10 h-10 rounded-full bg-japanRed/10 text-japanRed flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-hand-holding-heart"></i>
+                    </div>
+                    <h3 class="font-bold text-base text-afcNavy">10.000+ Produk Gratis</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Penyaluran lebih dari 10.000 produk suplemen secara cuma-cuma kepada orang sakit yang tidak mampu melalui referensi para member.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- 7. TESTIMONI -->
+    <section id="testimoni" class="py-16 bg-lightBg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 gsap-header-anim">
+                <span class="bg-amber-100 text-afcNavy text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest">Kisah Sukses Kesembuhan</span>
+                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-afcNavy mt-2">Apa Kata Pengguna Kami?</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6 gsap-testimonial-grid">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 card-shadow space-y-3">
+                    <div class="flex text-amber-400 text-xs gap-1">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-xs text-slate-600 italic">"Setelah rutin konsumsi SOP Subarashi, stamina dan sirkulasi darah meningkat pesat. Hasil laboratorium gula darah & tensi makin stabil!"</p>
+                    <div class="font-bold text-xs text-afcNavy border-t pt-2">Bpk. Hendra - Jakarta</div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 card-shadow space-y-3">
+                    <div class="flex text-amber-400 text-xs gap-1">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-xs text-slate-600 italic">"Utsukushhii Gold sangat membantu pencernaan saya. Kulit terasa lebih bersih, halus, dan imunitas tubuh jauh lebih terjaga."</p>
+                    <div class="font-bold text-xs text-afcNavy border-t pt-2">Ibu Dr. Ratna - Surabaya</div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 card-shadow space-y-3">
+                    <div class="flex text-amber-400 text-xs gap-1">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    </div>
+                    <p class="text-xs text-slate-600 italic">"Sensei Suru serum menyamarkan flek hitam dan kerutan di wajah secara nyata. Tekstur kulit jadi jauh lebih kencang!"</p>
+                    <div class="font-bold text-xs text-afcNavy border-t pt-2">Ibu Maya - Bandung</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. LOGO PARTNER & LEGALITAS -->
+    <section class="py-12 bg-white border-y border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center gsap-header-anim">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Partner Legitimasi & Akreditasi Resmi</p>
+            <div class="flex flex-wrap items-center justify-center gap-8 opacity-75 grayscale hover:grayscale-0 transition">
+                <span class="font-black text-slate-700 text-base">AFC-HD AMS JAPAN</span>
+                <span class="font-black text-slate-700 text-base">HONZO PHARMA</span>
+                <span class="font-black text-slate-700 text-base">BPOM RI</span>
+                <span class="font-black text-slate-700 text-base">HALAL MUI</span>
+                <span class="font-black text-slate-700 text-base">REKOR MURI</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. VIDEO COMPANY PROFILE -->
+    <section class="py-16 bg-lightBg">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 gsap-header-anim">
+            <span class="bg-amber-100 text-afcNavy text-[11px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest">Video Profil</span>
+            <h2 class="text-2xl sm:text-3xl font-serif font-bold text-afcNavy">Mengenal AFC Japan Lebih Dekat</h2>
+            <div class="aspect-video rounded-3xl overflow-hidden shadow-2xl border border-slate-200 bg-slate-900 flex items-center justify-center relative group">
+                <iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="AFC Lifescience Profile" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- 10. LOKASI KANTOR & MAPS -->
+    <section id="kontak" class="py-16 bg-white border-t border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-12 gap-8 items-center">
+            <div class="md:col-span-5 space-y-4 gsap-header-anim">
+                <span class="bg-amber-100 text-afcNavy text-[10px] font-extrabold px-3 py-1 rounded-full uppercase">Kantor Pusat Indonesia</span>
+                <h3 class="text-2xl font-serif font-bold text-afcNavy">LOKASI & ALAMAT KAMI</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    AFC Life Science Indonesia berpusat di Jakarta dan melayani pengiriman produk resmi bergaransi ke seluruh pelosok tanah air.
+                </p>
+                <div class="space-y-2 text-xs text-slate-700 pt-2">
+                    <p><i class="fa-solid fa-location-dot text-japanRed mr-2"></i> Jakarta, Indonesia</p>
+                    <p><i class="fa-brands fa-whatsapp text-emerald-600 mr-2"></i> +62 811-5994-455</p>
+                    <p><i class="fa-regular fa-clock text-afcGold mr-2"></i> Senin - Sabtu: 09.00 - 18.00 WIB</p>
+                </div>
+            </div>
+            <div class="md:col-span-7 gsap-header-anim">
+                <div class="aspect-video rounded-2xl overflow-hidden shadow-md border border-slate-200">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.666427301072!2d106.7821!3d-6.1754!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMTAnMzEuNCJTIDEwNsKwNDYnNTUuNiJF!5e0!3m2!1sid!2sid!4v1620000000000!5m2!1sid!2sid" class="w-full h-full border-0" allowfullscreen="" loading="lazy"></iframe>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-afcNavy text-slate-400 py-12 text-xs border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-4 gap-8">
+            <div class="space-y-3">
+                <span class="text-xl font-serif font-bold text-white block">AFC LIFESCIENCE</span>
+                <p class="leading-relaxed">Distributor Resmi Suplemen Organik Asal Jepang oleh AFC-HD AMS Life Science Co., Ltd.</p>
+            </div>
+            <div>
+                <h4 class="font-bold text-white mb-3 uppercase">Menu Navigasi</h4>
+                <ul class="space-y-2">
+                    <li><a href="#beranda" class="hover:text-afcGold">Beranda</a></li>
+                    <li><button onclick="app.modalController.openAboutModal()" class="hover:text-afcGold">Tentang Kami</button></li>
+                    <li><button onclick="app.modalController.openCareModal()" class="hover:text-afcGold">AFC Peduli</button></li>
+                    <li><a href="#produk" class="hover:text-afcGold">Katalog Produk</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold text-white mb-3 uppercase">Layanan Pelanggan</h4>
+                <p>Jakarta, Indonesia</p>
+                
+                <!-- LINK SOSIAL MEDIA FOOTER (NEW) -->
+                <div class="flex items-center gap-3 my-2">
+                    <a href="https://www.instagram.com/raliefighter?igsh=MTVkcm9wZngxanozcQ==" target="_blank" rel="noopener" class="text-slate-300 hover:text-amber-400 text-lg transition" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://www.tiktok.com/@kakralie?_r=1&_t=ZS-98cbQ3fByQ0" target="_blank" rel="noopener" class="text-slate-300 hover:text-amber-400 text-lg transition" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                </div>
+
+                <p class="mt-1">WhatsApp: +62 811-5994-455</p>
+                <p class="mt-1">Email: info@afc-lifescience.co.id</p>
+            </div>
+            <div>
+                <h4 class="font-bold text-white mb-3 uppercase">Jam Operasional</h4>
+                <p>Senin - Sabtu: 09:00 - 18:00 WIB</p>
+                <p class="mt-2 text-[10px] text-slate-500">© 2026 AFC Lifescience Indonesia. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 🛒 KERANJANG DRAWER SIDEBAR -->
+    <div id="cartDrawer" class="fixed inset-0 bg-black/60 z-50 hidden backdrop-blur-sm justify-end">
+        <div class="bg-white w-full max-w-md h-full flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-300">
+            <!-- Header Cart -->
+            <div class="p-4 bg-afcNavy text-white flex justify-between items-center">
+                <h3 class="text-sm font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-cart-shopping text-afcGold"></i> KERANJANG BELANJA
+                </h3>
+                <button onclick="app.cartController.toggleDrawer(false)" class="text-slate-300 hover:text-white text-xl font-bold">&times;</button>
+            </div>
+
+            <!-- List Produk Dalam Keranjang -->
+            <div id="cartItemsList" class="p-4 flex-1 overflow-y-auto space-y-3">
+                <p class="text-slate-400 text-xs text-center py-12">Keranjang Anda masih kosong.</p>
+            </div>
+
+            <!-- Footer & Trigger Form Checkout -->
+            <div class="p-4 bg-slate-50 border-t border-slate-200 space-y-3">
+                <div class="flex justify-between items-center text-sm font-black text-afcNavy">
+                    <span>Total Pembelian:</span>
+                    <span id="cartTotalText" class="text-japanRed text-base">Rp 0</span>
+                </div>
+
+                <button onclick="app.modalController.openCheckoutModal()" id="checkoutTriggerBtn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl transition flex items-center justify-center gap-2 text-xs shadow-md">
+                    <i class="fa-brands fa-whatsapp text-base"></i> PESAN VIA WHATSAPP
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📋 MODAL FORM DATA PEMESANAN -->
+    <div id="checkoutModal" class="fixed inset-0 bg-black/70 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden">
+            <div class="p-5 bg-afcNavy text-white flex justify-between items-center">
+                <h3 class="text-sm font-bold">Lengkapi Data Pemesanan</h3>
+                <button onclick="app.modalController.closeCheckoutModal()" class="text-slate-300 hover:text-white text-xl font-bold">&times;</button>
+            </div>
+            <form id="checkoutForm" onsubmit="app.cartController.processCheckout(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap *</label>
+                    <input type="text" id="custName" required placeholder="Contoh: Budi Santoso" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-afcGold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Alamat Email *</label>
+                    <input type="email" id="custEmail" required placeholder="budi@example.com" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-afcGold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nomor WhatsApp *</label>
+                    <input type="tel" id="custPhone" required placeholder="08123456789" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-xs focus:outline-none focus:border-afcGold">
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold py-3 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                        <i class="fa-brands fa-whatsapp text-base"></i> Kirim Pesanan ke WhatsApp
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 📖 MODAL POPUP "TENTANG KAMI" LENGKAP -->
+    <div id="aboutModal" class="fixed inset-0 bg-black/70 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="p-6 bg-afcNavy text-white flex justify-between items-center shrink-0">
+                <div>
+                    <h3 class="text-xl font-serif font-bold">Tentang Asayama Family Club (AFC Japan)</h3>
+                    <p class="text-xs text-amber-300 mt-0.5">Asayama Family Club & AFC Life Science Indonesia</p>
+                </div>
+                <button onclick="app.modalController.closeAboutModal()" class="text-slate-300 hover:text-white text-2xl font-bold">&times;</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto space-y-6 text-xs text-slate-600 leading-relaxed">
+                <!-- Paragraf Sejarah -->
+                <div class="space-y-3">
+                    <p class="text-sm font-semibold text-afcNavy">
+                        AFC merupakan singkatan dari <strong>Asayama Family Club</strong>. AFC Japan didirikan oleh <strong>Asayama Tadahiko</strong> setelah mengumpulkan pengalaman penjualan dan perdagangan selama bertahun-tahun. Beliau bekerja keras untuk membangun sistem produksi yang komprehensif dan beroperasi dengan 4 Prinsip Utama, yaitu meningkatkan <strong>Standar Kualitas, Keterjangkauan, Peningkatan Kesadaran, dan Tanggung Jawab Sosial</strong>.
+                    </p>
+                    <p>
+                        Pada tahun 1999, AFC memulai perdagangan internasional, mengembangkan lebih dari 200 produk di negara-negara besar lainnya seperti Singapura, Korea, dan China. Selama masa perkembangannya, Asayama Tadahiko menyadari bahwa industri ini sangat memiliki potensi besar untuk berkembang menjadi perusahaan besar dan mendunia. Asayama Tadahiko menjadi pemimpin industri kesehatan dan kecantikan produk Jepang yang terus berkembang.
+                    </p>
+                </div>
+
+                <!-- 5 Fondasi Perusahaan AFC -->
+                <div class="bg-amber-50/70 border border-amber-200 p-5 rounded-2xl space-y-3">
+                    <h4 class="font-serif font-bold text-sm text-afcNavy uppercase">5 Perusahaan Fondasi AFC Japan</h4>
+                    <p class="text-slate-600">Pada awal mula, Asayama Tadahiko mendirikan 5 perusahaan sebagai fondasi AFC:</p>
+                    <div class="grid md:grid-cols-2 gap-3 text-[11px] pt-1">
+                        <div class="bg-white p-3 rounded-xl border border-amber-200">
+                            <strong class="text-afcNavy block">1. AFC-HD AMS Life Science Co., Ltd</strong>
+                            <span>HQ & International Department Produksi Supplement & Makanan.</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-amber-200">
+                            <strong class="text-afcNavy block">2. AFC</strong>
+                            <span>Sebagai brand utama perusahaan.</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-amber-200">
+                            <strong class="text-afcNavy block">3. NYK - Nihon Preventive Medical Laboratory Co., Ltd</strong>
+                            <span>Pusat Riset dan Pengembangan (R&D).</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-amber-200">
+                            <strong class="text-afcNavy block">4. Kenko TV Co., Ltd</strong>
+                            <span>Jaringan televisi di Jepang untuk iklan dan promosi produk AFC.</span>
+                        </div>
+                        <div class="bg-white p-3 rounded-xl border border-amber-200 md:col-span-2">
+                            <strong class="text-afcNavy block">5. Honzo Pharmaceutical Herbal Medicine</strong>
+                            <span>Divisi Herbal Farmasi yang telah berdiri sejak tahun 1831 (Lebih dari 170 tahun).</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sejarah Honzo -->
+                <div class="space-y-2">
+                    <h4 class="font-serif font-bold text-sm text-afcNavy">Sejarah Honzo Pharmaceutical (Lebih dari 170 Tahun)</h4>
+                    <p>
+                        Salah satu divisi AFC HD AMS Life Science bernama Honzo (Herbal Pharmaceutical) telah berdiri lebih dari 170 tahun. Didirikan pada tahun 1831 dan dimulai dari penyedia produk herbal sejak jaman periode Edo. Seiring waktu, Honzo telah berkembang dan mendirikan beberapa pabrik dan departemen penelitian dan membuka kantor penjualan di Tokyo, Osaka, dan Nagoya dengan 142 premium produk yang telah dijual bebas di pasaran.
+                    </p>
+                    <p>
+                        Sejak didirikan, Honzo telah memberikan kontribusi bagi kesehatan masyarakat dengan memadukan tumbuhan obat yang ditemukan di alam. Honzo memproduksi dan menjual obat medis yang diresepkan oleh institusi medis, obat bebas yang dijual di apotek dan toko obat, makanan kesehatan dan kebutuhan sehari-hari.
+                    </p>
+                </div>
+
+                <!-- Specs Pabrik & Kredensial -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-2">
+                        <h4 class="font-bold text-xs uppercase text-afcNavy border-b pb-2 border-slate-200">AFC Factories (AFC-HD AMS Life Science Co., Ltd)</h4>
+                        <ul class="space-y-1 text-[11px] text-slate-600">
+                            <li><strong>Status:</strong> Listed on Stock Market</li>
+                            <li><strong>Certificate:</strong> GMP (Shizuoka Factory), ISO</li>
+                            <li><strong>Clients:</strong> Over 400 Clients</li>
+                            <li><strong>Turnover:</strong> JPY 15 Billion (USD 134 Million)</li>
+                            <li><strong>Employees:</strong> 1,000 (Total)</li>
+                            <li><strong>Established:</strong> 1969</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl space-y-2">
+                        <h4 class="font-bold text-xs uppercase text-afcNavy border-b pb-2 border-slate-200">Keunggulan Utama AFC Japan</h4>
+                        <ul class="space-y-1 text-[11px] text-slate-600">
+                            <li><i class="fa-solid fa-check text-emerald-600 mr-1"></i> Top 5 Perusahaan Suplemen di Jepang</li>
+                            <li><i class="fa-solid fa-check text-emerald-600 mr-1"></i> Perusahaan Pertama yang diberikan sertifikasi GMP di Jepang</li>
+                            <li><i class="fa-solid fa-check text-emerald-600 mr-1"></i> Lebih dari 50 tahun pengalaman bisnis produksi suplemen</li>
+                            <li><i class="fa-solid fa-check text-emerald-600 mr-1"></i> Memiliki lebih dari 40.000 produk yang terdaftar</li>
+                            <li><i class="fa-solid fa-check text-emerald-600 mr-1"></i> Sangat berpengalaman dalam bisnis internasional</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- AFC Life Science Indonesia & Rekor MURI -->
+                <div class="bg-slate-900 text-white p-5 rounded-2xl space-y-4">
+                    <div>
+                        <h4 class="font-serif font-bold text-base text-afcGold">AFC LIFE SCIENCE INDONESIA</h4>
+                        <p class="text-[11px] text-slate-300 mt-1 leading-relaxed">
+                            AFC Life Science merupakan distributor resmi dari AFC Jepang hadir di Indonesia sebagai perusahaan Direct Selling terbesar dan terpercaya. Komitmen kami bagi Indonesia menyediakan All Natural Supplement dengan kualitas terbaik dengan bahan-bahan anti-aging super premium yang sudah mendapatkan patent, teruji secara klinis, dan penghargaan Internasional dengan Marketing Plan terbaik.
+                        </p>
+                    </div>
+
+                    <div class="border-t border-slate-800 pt-3">
+                        <h5 class="font-bold text-xs text-amber-300 uppercase mb-2">Penghargaan Rekor MURI Indonesia:</h5>
+
+                        <!-- GALERI FOTO MURI (NEW) -->
+                        <div class="grid grid-cols-3 gap-2 my-3">
+                            <a href="https://imgbb.com/" target="_blank" rel="noopener" class="block overflow-hidden rounded-xl border border-slate-700 group">
+                                <img src="https://i.ibb.co.com/nM1TcMQC/muri-1.jpg" alt="muri-1" class="w-full h-24 object-cover group-hover:scale-105 transition duration-300" />
+                            </a>
+                            <a href="https://imgbb.com/" target="_blank" rel="noopener" class="block overflow-hidden rounded-xl border border-slate-700 group">
+                                <img src="https://i.ibb.co.com/N6R1q1Z7/muri-2.jpg" alt="muri-2" class="w-full h-24 object-cover group-hover:scale-105 transition duration-300" />
+                            </a>
+                            <a href="https://imgbb.com/" target="_blank" rel="noopener" class="block overflow-hidden rounded-xl border border-slate-700 group">
+                                <img src="https://i.ibb.co.com/XxXVJwDG/muri-3.jpg" alt="muri-3" class="w-full h-24 object-cover group-hover:scale-105 transition duration-300" />
+                            </a>
+                        </div>
+
+                        <div class="space-y-2 text-[11px] text-slate-300">
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-trophy text-afcGold mt-0.5"></i>
+                                <span>Grand Launching di Kapal Pesiar dengan undangan terbanyak (1.010 orang).</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-trophy text-afcGold mt-0.5"></i>
+                                <span>Perusahaan Pengimpor Suplemen Kesehatan Melalui Pengiriman dalam Pesawat Terbanyak dalam 1 Minggu.</span>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <i class="fa-solid fa-trophy text-afcGold mt-0.5"></i>
+                                <span>Perusahaan Penjualan Langsung dengan Pembayaran Bonus Terbanyak.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-50 border-t border-slate-200 shrink-0 text-right">
+                <button onclick="app.modalController.closeAboutModal()" class="bg-afcNavy text-white font-bold px-6 py-2 rounded-xl text-xs hover:bg-slate-800 transition">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📖 MODAL POPUP "AFC PEDULI (AFC CARE)" LENGKAP -->
+    <div id="careModal" class="fixed inset-0 bg-black/70 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="p-6 bg-gradient-to-r from-japanRed to-rose-700 text-white flex justify-between items-center shrink-0">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-2xl font-serif font-black tracking-wide">AFC Care</h3>
+                        <span class="bg-white/20 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">CSR Program</span>
+                    </div>
+                    <p class="text-xs text-rose-100 font-serif mt-0.5">企業の社会的責任 — Corporate Social Responsibility</p>
+                </div>
+                <button onclick="app.modalController.closeCareModal()" class="text-white hover:text-rose-200 text-3xl font-bold transition">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto space-y-6 text-xs text-slate-700 leading-relaxed">
+                <!-- Vision Banner -->
+                <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 p-5 rounded-2xl space-y-2">
+                    <p class="text-sm font-semibold text-afcNavy leading-relaxed">
+                        Misi AFC Indonesia adalah menjadi terang bagi bangsa Indonesia, terutama di daerah terpencil dan tertinggal. Lewat AFC Care kami berharap kami bisa menjadi dampak positif untuk menjadi terang bagi daerah terpencil dan tertinggal.
+                    </p>
+                    <p class="text-xs font-bold text-japanRed italic">
+                        "Kami percaya bahwa orang yang rajin memberi tidak akan pernah berkekurangan."
+                    </p>
+                    <p class="text-[11px] text-slate-500 pt-1 border-t border-amber-200/60">
+                        Berikut adalah beberapa CSR yang sudah kami lakukan:
+                    </p>
+                </div>
+
+                <!-- GALERI FOTO AFC CARE DI DALAM MODAL (NEW) -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <a href="https://ibb.co.com/TDQnpQZF" target="_blank" rel="noopener" class="block overflow-hidden rounded-xl border border-slate-200 group shadow-sm">
+                        <img src="https://i.ibb.co.com/KctQRtY3/batuputih.jpg" alt="batuputih" class="w-full h-36 object-cover group-hover:scale-105 transition duration-300" />
+                    </a>
+                    <a href="https://ibb.co.com/WvY7HbRj" target="_blank" rel="noopener" class="block overflow-hidden rounded-xl border border-slate-200 group shadow-sm">
+                        <img src="https://i.ibb.co.com/qYPhDt2V/kolonel-simon.jpg" alt="kolonel-simon" class="w-full h-36 object-cover group-hover:scale-105 transition duration-300" />
+                    </a>
+                    <a href="https://ibb.co.com/BHcx6nSG" target="_blank" rel="noopener" class="block overflow-hidden rounded-xl border border-slate-200 group shadow-sm">
+                        <img src="https://i.ibb.co.com/LDYWgN2r/afc-care.jpg" alt="afc-care" class="w-full h-36 object-cover group-hover:scale-105 transition duration-300" />
+                    </a>
+                </div>
+
+                <!-- Highlight Box 10,000+ Free Products -->
+                <div class="bg-rose-50 border-l-4 border-japanRed p-4 rounded-r-2xl flex items-start gap-4">
+                    <div class="w-10 h-10 rounded-full bg-japanRed/10 text-japanRed flex items-center justify-center text-xl shrink-0">
+                        <i class="fa-solid fa-heart-circle-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm text-japanRed">Bantuan Kesehatan Langsung</h4>
+                        <p class="text-slate-600 mt-0.5">
+                            Untuk CSR, kami mendirikan <strong>AFC CARE</strong>, dimana AFC Care ini adalah gerakan untuk menjadi terang bagi Bangsa Indonesia. AFC Care sudah memberikan <strong>lebih dari 10.000 produk gratis</strong> kepada orang sakit yang tidak mampu, yang direferensikan oleh member.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CSR Grid Items -->
+                <div class="grid md:grid-cols-2 gap-4 pt-2">
+                    <!-- Item 1 -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 hover:border-afcGold transition">
+                        <div class="flex items-center gap-2 text-afcNavy font-bold text-sm">
+                            <i class="fa-solid fa-hospital-user text-japanRed"></i>
+                            <span>AFC Health Centre Lombok</span>
+                        </div>
+                        <p class="text-slate-600 leading-relaxed text-[11px]">
+                            Sebuah mimpi yang terwujud, akhirnya kami AFC melalui program AFC Care berhasil melakukan pembangunan untuk Health Centre pertama kami di Lombok, ini adalah langkah awal kami untuk membantu meningkatkan kualitas kesehatan di negara Indonesia.
+                        </p>
+                    </div>
+
+                    <!-- Item 2 -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 hover:border-afcGold transition">
+                        <div class="flex items-center gap-2 text-afcNavy font-bold text-sm">
+                            <i class="fa-solid fa-hands-holding-child text-amber-600"></i>
+                            <span>Yayasan Sayangi Tunas Cilik</span>
+                        </div>
+                        <p class="text-slate-600 leading-relaxed text-[11px]">
+                            AFC Care bekerjasama dengan Yayasan Sayangi Tunas Cilik untuk Lombok dalam memberikan bantuan dan pemulihan anak-anak yang membutuhkan.
+                        </p>
+                    </div>
+
+                    <!-- Item 3 -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 hover:border-afcGold transition">
+                        <div class="flex items-center gap-2 text-afcNavy font-bold text-sm">
+                            <i class="fa-solid fa-faucet-drip text-blue-600"></i>
+                            <span>Kerjasama Pengeboran Mata Air</span>
+                        </div>
+                        <p class="text-slate-600 leading-relaxed text-[11px]">
+                            AFC Care bekerjasama dengan <strong>Kolonel CPL Simon Petrus Kamlasi</strong>. Bentuk kerjasama ini untuk pengeboran mata air di beberapa kota yang mengalami kekeringan di Indonesia, seperti Jawa Barat dan Kota Soe (Nusa Tenggara Timur).
+                        </p>
+                    </div>
+
+                    <!-- Item 4 -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 hover:border-afcGold transition">
+                        <div class="flex items-center gap-2 text-afcNavy font-bold text-sm">
+                            <i class="fa-solid fa-graduation-cap text-emerald-600"></i>
+                            <span>Yayasan Bani Al Hakim</span>
+                        </div>
+                        <p class="text-slate-600 leading-relaxed text-[11px]">
+                            Kami memberikan dukungan finansial selama satu tahun ke Yayasan Bani Al Hakim (Sekolah Tahfidz dan Rumah Santri) yang mengalami kekurangan dana operasional.
+                        </p>
+                    </div>
+
+                    <!-- Item 5 -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 hover:border-afcGold transition">
+                        <div class="flex items-center gap-2 text-afcNavy font-bold text-sm">
+                            <i class="fa-solid fa-building-user text-purple-600"></i>
+                            <span>AFC Care untuk Nabire</span>
+                        </div>
+                        <p class="text-slate-600 leading-relaxed text-[11px]">
+                            AFC Care bersama <strong>Raline Shah</strong> memberikan donasi untuk membangun beberapa fasilitas umum, seperti Asrama Putri, kamar mandi, dan toilet umum untuk anak-anak Nabire yang membutuhkan.
+                        </p>
+                    </div>
+
+                    <!-- Item 6 -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 hover:border-afcGold transition">
+                        <div class="flex items-center gap-2 text-afcNavy font-bold text-sm">
+                            <i class="fa-solid fa-droplet text-cyan-600"></i>
+                            <span>Batuputih, Hane (NTT)</span>
+                        </div>
+                        <p class="text-slate-600 leading-relaxed text-[11px]">
+                            Kami memberikan donasi untuk pembangunan sumber air bersih di kawasan Batuputih, Hane, Nusa Tenggara Timur. Pembangunan ini juga dibantu oleh beberapa para abdi negara dan pada akhirnya pembangunan air bersih ini selesai dan masyarakat setempat bisa mendapatkan air bersih.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 bg-slate-50 border-t border-slate-200 shrink-0 flex justify-between items-center">
+                <span class="text-[11px] text-slate-500 font-semibold"><i class="fa-solid fa-heart text-japanRed mr-1"></i> Terus Berbagi Bersama AFC Care</span>
+                <button onclick="app.modalController.closeCareModal()" class="bg-japanRed hover:bg-rose-800 text-white font-bold px-6 py-2 rounded-xl text-xs transition shadow-md">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📖 MODAL POPUP "DETAIL MANFAAT PRODUK" -->
+    <div id="benefitModal" class="fixed inset-0 bg-black/70 z-50 hidden backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden">
+            <div id="benefitModalHeader" class="p-6 text-white bg-afcNavy flex justify-between items-center">
+                <div>
+                    <h3 id="benefitModalTitle" class="text-lg font-serif font-bold">Nama Produk</h3>
+                    <p id="benefitModalSubtitle" class="text-xs text-amber-200">Subjudul Produk</p>
+                </div>
+                <button onclick="app.modalController.closeBenefitModal()" class="text-white hover:text-amber-200 text-2xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                <h4 class="font-bold text-xs uppercase text-afcNavy">Detail Manfaat Utama & Paten Fungsi:</h4>
+                <div id="benefitModalList" class="space-y-2 text-xs text-slate-600">
+                    <!-- Dynamic Items -->
+                </div>
+            </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between items-center">
+                <div id="benefitModalPrice" class="font-extrabold text-japanRed text-base">Rp 0</div>
+                <button id="benefitModalAddBtn" class="bg-afcNavy hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs">
+                    Tambah Ke Keranjang
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🔴 FLOATING SOSIAL MEDIA (IG, TIKTOK, WA) MELAYANG DI KANAN BAWAH (NEW & UPDATED) -->
+    <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 items-end">
+        <!-- Logo Instagram -->
+        <a href="https://www.instagram.com/raliefighter?igsh=MTVkcm9wZngxanozcQ==" target="_blank" rel="noopener" title="Instagram" class="w-12 h-12 bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 text-white rounded-full shadow-2xl flex items-center justify-center text-2xl transition transform hover:scale-110 active:scale-95 border-2 border-white">
+            <i class="fa-brands fa-instagram"></i>
+        </a>
+
+        <!-- Logo TikTok -->
+        <a href="https://www.tiktok.com/@kakralie?_r=1&_t=ZS-98cbQ3fByQ0" target="_blank" rel="noopener" title="TikTok" class="w-12 h-12 bg-black text-white rounded-full shadow-2xl flex items-center justify-center text-2xl transition transform hover:scale-110 active:scale-95 border-2 border-white">
+            <i class="fa-brands fa-tiktok"></i>
+        </a>
+
+        <!-- Logo WhatsApp -->
+        <a href="https://wa.me/628115994455?text=Halo%20AFC%20Lifescience,%20saya%20ingin%20tanya%20produk" target="_blank" rel="noopener" title="WhatsApp" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-3 rounded-full shadow-2xl flex items-center gap-2 font-bold text-xs transition transform hover:scale-105 border-2 border-white">
+            <i class="fa-brands fa-whatsapp text-xl"></i>
+            <span class="hidden sm:inline">LIVE CHAT WHATSAPP</span>
+        </a>
+    </div>
+
+    <!-- ------------------------------------------------------------------- -->
+    <!-- JS ARCHITECTURE -->
+    <!-- ------------------------------------------------------------------- -->
+    <script type="module">
+        const PRODUCT_DATABASE = {
+            P01: {
+                id: 'P01',
+                name: 'SOP Subarashi Gold',
+                subtitle: 'Triple Peptide - Cell Regeneration & Blood Circulation',
+                price: 1950000,
+                benefits: [
+                    'Paten JP-3946238: Membantu merangsang regenerasi sel-sel organ tubuh yang rusak.',
+                    'Paten JP-02003055901A1: Membantu menstabilkan tekanan darah (Anti-Hipertensi).',
+                    'Paten JP-3946239: Memperbaiki dan melancarkan sirkulasi pembuluh darah mikro.',
+                    'Mencegah penyumbatan plak pada pembuluh darah jantung & otak.'
+                ]
+            },
+            P02: {
+                id: 'P02',
+                name: 'Hikari Superfood',
+                subtitle: 'Eye & Brain Protection Superfood',
+                price: 1900000,
+                benefits: [
+                    'Paten US20130231297A1: Membantu melindungi sel retina mata dari kerusakan oksidatif.',
+                    'Paten US9226940B2: Memfilter paparan sinar Bluelight radiasi gadget & komputer.',
+                    'Paten EP3538085B1: Meningkatkan daya ingat, tingkat fokus & fungsi kognitif otak.'
+                ]
+            },
+            P03: {
+                id: 'P03',
+                name: 'Utsukushhii Gold',
+                subtitle: 'Salmon DNA, Probiotics & NK Cell Immunity',
+                price: 1800000,
+                benefits: [
+                    'Paten JP-3040711B2: Agen anti-tumor aktif untuk memperkuat sel kekebalan tubuh.',
+                    'Paten JP-3272023B2: Memicu aktivitas sel NK (Natural Killer) pembunuh sel rusak/virus.',
+                    'Mengandung 1 Triliun Probiotik usus serta Salmon DNA untuk mencerahkan kulit.'
+                ]
+            },
+            P04: {
+                id: 'P04',
+                name: 'Sensei Suru Serum',
+                subtitle: 'Nano Peptide Regenerative Skin Serum',
+                price: 3500000,
+                benefits: [
+                    'Mengandung Salmon Ovary Peptide & Secretion Marin Peptide murni.',
+                    'Mendorong perbaikan tekstur kulit wajah & menyamarkan kerutan dalam.',
+                    'Anti-aging serum kelas medis berkualitas tinggi buatan Jepang.'
+                ]
+            }
+        };
+
+        class SecurityUtils {
+            static sanitize(str) {
+                const temp = document.createElement('div');
+                temp.textContent = str;
+                return temp.innerHTML.trim();
+            }
+
+            static formatRupiah(num) {
+                return 'Rp ' + Number(num).toLocaleString('id-ID');
+            }
+        }
+
+        class CartStore {
+            constructor() {
+                this.items = [];
+                this.listeners = [];
+            }
+
+            addItem(product) {
+                const existing = this.items.find(i => i.id === product.id);
+                if (existing) {
+                    existing.qty += 1;
+                } else {
+                    this.items.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
+                }
+                this.notify();
+            }
+
+            updateQty(index, change) {
+                if (index >= 0 && index < this.items.length) {
+                    this.items[index].qty += change;
+                    if (this.items[index].qty <= 0) {
+                        this.items.splice(index, 1);
+                    }
+                    this.notify();
+                }
+            }
+
+            removeItem(index) {
+                if (index >= 0 && index < this.items.length) {
+                    this.items.splice(index, 1);
+                    this.notify();
+                }
+            }
+
+            getTotal() {
+                return this.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            }
+
+            getTotalQty() {
+                return this.items.reduce((sum, item) => sum + item.qty, 0);
+            }
+
+            subscribe(listener) {
+                this.listeners.push(listener);
+            }
+
+            notify() {
+                this.listeners.forEach(fn => fn(this.items));
+            }
+        }
+
+        class ModalController {
+            constructor(cartStore) {
+                this.cartStore = cartStore;
+            }
+
+            openAboutModal() {
+                document.getElementById('aboutModal').classList.remove('hidden');
+            }
+
+            closeAboutModal() {
+                document.getElementById('aboutModal').classList.add('hidden');
+            }
+
+            openCareModal() {
+                document.getElementById('careModal').classList.remove('hidden');
+            }
+
+            closeCareModal() {
+                document.getElementById('careModal').classList.add('hidden');
+            }
+
+            openCheckoutModal() {
+                if (this.cartStore.items.length === 0) {
+                    alert('Keranjang Anda masih kosong.');
+                    return;
+                }
+                document.getElementById('checkoutModal').classList.remove('hidden');
+            }
+
+            closeCheckoutModal() {
+                document.getElementById('checkoutModal').classList.add('hidden');
+            }
+
+            openDetail(productId) {
+                const product = PRODUCT_DATABASE[productId];
+                if (!product) return;
+
+                document.getElementById('benefitModalTitle').innerText = product.name;
+                document.getElementById('benefitModalSubtitle').innerText = product.subtitle;
+                document.getElementById('benefitModalPrice').innerText = SecurityUtils.formatRupiah(product.price);
+
+                const listContainer = document.getElementById('benefitModalList');
+                listContainer.innerHTML = '';
+                product.benefits.forEach(b => {
+                    listContainer.innerHTML += `
+                        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-start gap-2">
+                            <i class="fa-solid fa-circle-check text-emerald-600 mt-0.5"></i>
+                            <span>${SecurityUtils.sanitize(b)}</span>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('benefitModalAddBtn').onclick = () => {
+                    this.cartStore.addItem({ id: product.id, name: product.name, price: product.price });
+                    this.closeBenefitModal();
+                    app.cartController.toggleDrawer(true);
+                };
+
+                document.getElementById('benefitModal').classList.remove('hidden');
+            }
+
+            closeBenefitModal() {
+                document.getElementById('benefitModal').classList.add('hidden');
+            }
+        }
+
+        class Three3DWorld {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                if (!this.container) return;
+
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                this.particles = [];
+                this.mesh3D = null;
+
+                this.init();
+            }
+
+            init() {
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.container.appendChild(this.renderer.domElement);
+
+                this.camera.position.z = 10;
+
+                // 3D "Hello World" Mesh Object (Golden Interactive Torus Knot)
+                const geometry = new THREE.TorusKnotGeometry(1.8, 0.4, 120, 16);
+                const material = new THREE.MeshBasicMaterial({ 
+                    color: 0xD4AF37, 
+                    wireframe: true, 
+                    transparent: true, 
+                    opacity: 0.35 
+                });
+                this.mesh3D = new THREE.Mesh(geometry, material);
+                this.mesh3D.position.set(3, 0, 0);
+                this.scene.add(this.mesh3D);
+
+                // Particle System
+                const geo = new THREE.SphereGeometry(0.08, 8, 8);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xD4AF37 });
+
+                for (let i = 0; i < 70; i++) {
+                    const particle = new THREE.Mesh(geo, mat);
+                    particle.position.set(
+                        (Math.random() - 0.5) * 20,
+                        (Math.random() - 0.5) * 20,
+                        (Math.random() - 0.5) * 10
+                    );
+                    particle.userData = {
+                        speedY: 0.003 + Math.random() * 0.005,
+                        speedX: (Math.random() - 0.5) * 0.002
+                    };
+                    this.particles.push(particle);
+                    this.scene.add(particle);
+                }
+
+                window.addEventListener('resize', () => this.onResize());
+                
+                // Interaction with GSAP Scroll
+                if (window.gsap && window.ScrollTrigger) {
+                    gsap.to(this.mesh3D.rotation, {
+                        x: Math.PI * 4,
+                        y: Math.PI * 4,
+                        scrollTrigger: {
+                            trigger: "body",
+                            start: "top top",
+                            end: "bottom bottom",
+                            scrub: 1.5
+                        }
+                    });
+
+                    gsap.to(this.camera.position, {
+                        z: 14,
+                        y: -3,
+                        scrollTrigger: {
+                            trigger: "body",
+                            start: "top top",
+                            end: "bottom bottom",
+                            scrub: 2
+                        }
+                    });
+                }
+
+                this.animate();
+            }
+
+            onResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+
+                if (this.mesh3D) {
+                    this.mesh3D.rotation.x += 0.002;
+                    this.mesh3D.rotation.y += 0.003;
+                }
+
+                this.particles.forEach(p => {
+                    p.position.y += p.userData.speedY;
+                    p.position.x += p.userData.speedX;
+
+                    if (p.position.y > 10) p.position.y = -10;
+                });
+
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+
+        class App {
+            constructor() {
+                this.cartStore = new CartStore();
+                this.modalController = new ModalController(this.cartStore);
+
+                this.cartController = {
+                    addItem: (product) => {
+                        this.cartStore.addItem(product);
+                        this.toggleDrawer(true);
+                    },
+                    updateQty: (idx, change) => this.cartStore.updateQty(idx, change),
+                    removeItem: (idx) => this.cartStore.removeItem(idx),
+                    toggleDrawer: (forceOpen = false) => this.toggleDrawer(forceOpen),
+                    processCheckout: (e) => this.processCheckout(e)
+                };
+
+                this.initUI();
+                this.initScrollAnimations();
+            }
+
+            initUI() {
+                this.cartStore.subscribe(() => this.renderCartUI());
+                new Three3DWorld('hero-3d-canvas');
+            }
+
+            initScrollAnimations() {
+                if (!window.gsap || !window.ScrollTrigger) return;
+                gsap.registerPlugin(ScrollTrigger);
+
+                // Smooth Scroll Intro for Hero
+                gsap.from(".hero-content-gsap", {
+                    duration: 1.2,
+                    y: 50,
+                    opacity: 0,
+                    ease: "power3.out",
+                    delay: 0.2
+                });
+
+                gsap.from(".hero-card-gsap", {
+                    duration: 1.2,
+                    scale: 0.9,
+                    opacity: 0,
+                    ease: "power3.out",
+                    delay: 0.4
+                });
+
+                // Smooth Scroll Stats Box
+                gsap.from(".gsap-stat-box > div", {
+                    scrollTrigger: {
+                        trigger: ".gsap-stat-box",
+                        start: "top 85%",
+                    },
+                    y: 30,
+                    opacity: 0,
+                    duration: 0.8,
+                    stagger: 0.15,
+                    ease: "power2.out"
+                });
+
+                // Section Headers Animation
+                gsap.utils.toArray(".gsap-header-anim").forEach(header => {
+                    gsap.from(header, {
+                        scrollTrigger: {
+                            trigger: header,
+                            start: "top 85%",
+                        },
+                        y: 40,
+                        opacity: 0,
+                        duration: 0.8,
+                        ease: "power2.out"
+                    });
+                });
+
+                // Smooth Scroll About Section
+                gsap.from(".gsap-about-text", {
+                    scrollTrigger: {
+                        trigger: "#tentang",
+                        start: "top 75%",
+                    },
+                    x: -50,
+                    opacity: 0,
+                    duration: 1,
+                    ease: "power3.out"
+                });
+
+                gsap.from(".gsap-about-grid > div", {
+                    scrollTrigger: {
+                        trigger: ".gsap-about-grid",
+                        start: "top 80%",
+                    },
+                    y: 30,
+                    opacity: 0,
+                    duration: 0.8,
+                    stagger: 0.15,
+                    ease: "power2.out"
+                });
+
+                // Smooth Scroll Keunggulan Cards
+                gsap.from(".gsap-advantages-grid > div", {
+                    scrollTrigger: {
+                        trigger: "#keunggulan",
+                        start: "top 75%",
+                    },
+                    y: 40,
+                    opacity: 0,
+                    duration: 0.8,
+                    stagger: 0.12,
+                    ease: "back.out(1.5)"
+                });
+
+                // Smooth Scroll Products Cards
+                gsap.from(".gsap-products-grid > div", {
+                    scrollTrigger: {
+                        trigger: "#produk",
+                        start: "top 75%",
+                    },
+                    y: 50,
+                    opacity: 0,
+                    duration: 0.9,
+                    stagger: 0.15,
+                    ease: "power3.out"
+                });
+
+                // Smooth Scroll CSR Grid
+                gsap.from(".gsap-csr-grid > div", {
+                    scrollTrigger: {
+                        trigger: "#berita",
+                        start: "top 75%",
+                    },
+                    y: 40,
+                    opacity: 0,
+                    duration: 0.8,
+                    stagger: 0.15,
+                    ease: "power2.out"
+                });
+
+                // Smooth Scroll Testimonials
+                gsap.from(".gsap-testimonial-grid > div", {
+                    scrollTrigger: {
+                        trigger: "#testimoni",
+                        start: "top 75%",
+                    },
+                    scale: 0.9,
+                    opacity: 0,
+                    duration: 0.8,
+                    stagger: 0.15,
+                    ease: "power2.out"
+                });
+            }
+
+            toggleDrawer(forceOpen = false) {
+                const drawer = document.getElementById('cartDrawer');
+                if (forceOpen) {
+                    drawer.classList.remove('hidden');
+                    drawer.classList.add('flex');
+                } else {
+                    drawer.classList.toggle('hidden');
+                    drawer.classList.toggle('flex');
+                }
+            }
+
+            processCheckout(e) {
+                e.preventDefault();
+                const name = SecurityUtils.sanitize(document.getElementById('custName').value);
+                const email = SecurityUtils.sanitize(document.getElementById('custEmail').value);
+                const phone = SecurityUtils.sanitize(document.getElementById('custPhone').value);
+
+                if (!name || !email || !phone) return;
+
+                let msg = `Halo AFC Lifescience,\n\n`;
+                msg += `Saya ingin memesan:\n\n`;
+
+                this.cartStore.items.forEach((item, index) => {
+                    msg += `${index + 1}. ${item.name} - ${item.qty}x\n`;
+                });
+
+                msg += `\nTotal: ${SecurityUtils.formatRupiah(this.cartStore.getTotal())}\n\n`;
+                msg += `Nama: ${name}\n`;
+                msg += `Email: ${email}\n`;
+                msg += `No HP: ${phone}\n\n`;
+                msg += `Mohon informasi pembayaran selanjutnya. Terima kasih.`;
+
+                const waUrl = `https://wa.me/628115994455?text=${encodeURIComponent(msg)}`;
+                window.open(waUrl, '_blank');
+                this.modalController.closeCheckoutModal();
+            }
+
+            renderCartUI() {
+                const list = document.getElementById('cartItemsList');
+                const badge = document.getElementById('headerCartBadge');
+                const total = document.getElementById('cartTotalText');
+
+                const totalQty = this.cartStore.getTotalQty();
+                const totalPrice = this.cartStore.getTotal();
+
+                badge.innerText = totalQty;
+                total.innerText = SecurityUtils.formatRupiah(totalPrice);
+
+                if (this.cartStore.items.length === 0) {
+                    list.innerHTML = '<p class="text-slate-400 text-xs text-center py-12">Keranjang Anda masih kosong.</p>';
+                    return;
+                }
+
+                list.innerHTML = '';
+                this.cartStore.items.forEach((item, index) => {
+                    list.innerHTML += `
+                        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            <div>
+                                <h4 class="text-xs font-bold text-afcNavy">${SecurityUtils.sanitize(item.name)}</h4>
+                                <p class="text-[11px] text-japanRed font-bold mt-0.5">${SecurityUtils.formatRupiah(item.price)}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="app.cartController.updateQty(${index}, -1)" class="w-6 h-6 rounded bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">-</button>
+                                <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
+                                <button onclick="app.cartController.updateQty(${index}, 1)" class="w-6 h-6 rounded bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">+</button>
+                                <button onclick="app.cartController.removeItem(${index})" class="text-slate-400 hover:text-red-600 ml-2 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        }
+
+        window.app = new App();
+    </script>
+</body>
+</html>            <p id="hero-desc" class="text-slate-300 text-base md:text-lg leading-relaxed max-w-md font-light" data-i18n="hero-desc-full">I handle daily operations, build scalable CRM systems, and execute clear content strategies for global brands.</p>https://RalieCare.id
