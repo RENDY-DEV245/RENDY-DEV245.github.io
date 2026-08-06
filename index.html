@@ -798,6 +798,18 @@
         </div>
     </footer>
 
+    <!-- ============================================ -->
+    <!-- TEMPEL KODE 1 (HTML FORM AUTH) DI SINI -->
+    <!-- ============================================ -->
+    <div id="auth-section" class="max-w-md mx-auto my-10 p-6 bg-white rounded-xl shadow-md">
+      <!-- FORM REGISTER -->
+      <div id="register-box">...</div>
+      <!-- FORM LOGIN -->
+      <div id="login-box">...</div>
+      <!-- STATUS USER -->
+      <div id="user-box" style="display:none;">...</div>
+    </div>
+
     <!-- 🛒 KERANJANG DRAWER SIDEBAR -->
     <div id="cartDrawer" class="fixed inset-0 bg-black/60 z-50 hidden backdrop-blur-sm justify-end">
         <div class="bg-white w-full max-w-md h-full flex flex-col justify-between shadow-2xl animate-in slide-in-from-right duration-300">
@@ -1924,5 +1936,149 @@ window.loadPhotoLikes = async function() {
 };
 
     </script>
+<script type="module">
+  // Import yang sudah ada
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
+  
+  // TAMBAHIN INI (Auth)
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } 
+    from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+
+  // TAMBAHIN INI (Database)
+  import { getDatabase, ref, set, get, push } 
+    from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+
+  // Your web app's Firebase configuration (tetap sama, jangan diubah)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
+    authDomain: "web-afc.firebaseapp.com",
+    databaseURL: "https://web-afc-default-rtdb.firebaseio.com",
+    projectId: "web-afc",
+    storageBucket: "web-afc.firebasestorage.app",
+    messagingSenderId: "202313452502",
+    appId: "1:202313452502:web:57e2551bdab34ba3b1f277",
+    measurementId: "G-MZJ6DDCJCS"
+  };
+
+  // Initialize Firebase (tetap sama)
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+  // TAMBAHIN INI (biar bisa dipakai di bawahnya)
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+  
+// ---- REGISTER ----
+  document.getElementById("btn-register").addEventListener("click", async () => {
+    const username = document.getElementById("reg-username").value.trim();
+    const email = document.getElementById("reg-email").value.trim();
+    const password = document.getElementById("reg-password").value;
+    const errorEl = document.getElementById("reg-error");
+    errorEl.textContent = "";
+
+    if (!username || !email || !password) {
+      errorEl.textContent = "Semua kolom wajib diisi.";
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const uid = userCredential.user.uid;
+
+      await set(ref(db, "users/" + uid), {
+        username: username,
+        email: email,
+        createdAt: new Date().toISOString()
+      });
+
+      alert("Registrasi berhasil! Silakan login.");
+    } catch (e) {
+      errorEl.textContent = terjemahErrorFirebase(e.code);
+    }
+  });
+
+  // ---- LOGIN ----
+  document.getElementById("btn-login").addEventListener("click", async () => {
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+    const errorEl = document.getElementById("login-error");
+    errorEl.textContent = "";
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (e) {
+      errorEl.textContent = terjemahErrorFirebase(e.code);
+    }
+  });
+
+  // ---- LOGOUT ----
+  document.getElementById("btn-logout").addEventListener("click", async () => {
+    await signOut(auth);
+  });
+
+  // ---- PANTAU STATUS LOGIN ----
+  onAuthStateChanged(auth, async (user) => {
+    const registerBox = document.getElementById("register-box");
+    const loginBox = document.getElementById("login-box");
+    const userBox = document.getElementById("user-box");
+
+    if (user) {
+      const snapshot = await get(ref(db, "users/" + user.uid));
+      const username = snapshot.exists() ? snapshot.val().username : user.email;
+
+      document.getElementById("user-name").textContent = username;
+      registerBox.style.display = "none";
+      loginBox.style.display = "none";
+      userBox.style.display = "block";
+    } else {
+      registerBox.style.display = "block";
+      loginBox.style.display = "block";
+      userBox.style.display = "none";
+    }
+  });
+
+  function terjemahErrorFirebase(code) {
+    switch (code) {
+      case "auth/email-already-in-use": return "Email sudah terdaftar.";
+      case "auth/invalid-email": return "Format email tidak valid.";
+      case "auth/weak-password": return "Password minimal 6 karakter.";
+      case "auth/user-not-found": return "Akun tidak ditemukan.";
+      case "auth/wrong-password": return "Password salah.";
+      case "auth/invalid-credential": return "Email atau password salah.";
+      default: return "Terjadi kesalahan: " + code;
+    }
+  }
+  
+</script>
+<div id="auth-section">
+
+  <!-- FORM REGISTER -->
+  <div id="register-box">
+    <h3>Daftar Akun</h3>
+    <input type="text" id="reg-username" placeholder="Username">
+    <input type="email" id="reg-email" placeholder="Email">
+    <input type="password" id="reg-password" placeholder="Password">
+    <button id="btn-register">Daftar</button>
+    <p id="reg-error" style="color:red;"></p>
+  </div>
+
+  <!-- FORM LOGIN -->
+  <div id="login-box">
+    <h3>Login</h3>
+    <input type="email" id="login-email" placeholder="Email">
+    <input type="password" id="login-password" placeholder="Password">
+    <button id="btn-login">Login</button>
+    <p id="login-error" style="color:red;"></p>
+  </div>
+
+  <!-- STATUS USER (muncul kalau udah login) -->
+  <div id="user-box" style="display:none;">
+    <p>Halo, <span id="user-name"></span>!</p>
+    <button id="btn-logout">Logout</button>
+  </div>
+
+</div>
+
 </body>
-                            </html>
+    </html>
