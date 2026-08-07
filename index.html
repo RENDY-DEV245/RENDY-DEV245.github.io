@@ -821,10 +821,7 @@
     <!-- TEMPEL KODE 1 (HTML FORM AUTH) DI SINI -->
     <!-- ============================================ -->
     <div id="auth-section" class="max-w-md mx-auto my-10 p-6 bg-white rounded-xl shadow-md">
-      <!-- FORM REGISTER -->
-      <div id="register-box">...</div>
-      <!-- FORM LOGIN -->
-      <div id="login-box">...</div>
+      
       <!-- STATUS USER -->
       <div id="user-box" style="display:none;">...</div>
     </div>
@@ -1956,7 +1953,7 @@ window.loadPhotoLikes = async function() {
 
     </script>
 <script type="module">
-  // Import yang sudah ada
+ // Import yang sudah ada
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
   
@@ -1980,65 +1977,7 @@ window.loadPhotoLikes = async function() {
     measurementId: "G-MZJ6DDCJCS"
   };
 
-  // Initialize Firebase (tetap sama)
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-
-  // TAMBAHIN INI (biar bisa dipakai di bawahnya)
-  const auth = getAuth(app);
-  const db = getDatabase(app);
-  
-// ---- REGISTER ----
-  document.getElementById("btn-register").addEventListener("click", async () => {
-    const username = document.getElementById("reg-username").value.trim();
-    const email = document.getElementById("reg-email").value.trim();
-    const password = document.getElementById("reg-password").value;
-    const errorEl = document.getElementById("reg-error");
-    errorEl.textContent = "";
-
-    if (!username || !email || !password) {
-      errorEl.textContent = "Semua kolom wajib diisi.";
-      return;
-    }
-
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const uid = userCredential.user.uid;
-
-      await set(ref(db, "users/" + uid), {
-        username: username,
-        email: email,
-        createdAt: new Date().toISOString()
-      });
-
-      alert("Registrasi berhasil! Silakan login.");
-    } catch (e) {
-      errorEl.textContent = terjemahErrorFirebase(e.code);
-    }
-  });
-
-  // ---- LOGIN ----
-  document.getElementById("btn-login").addEventListener("click", async () => {
-    const email = document.getElementById("login-email").value.trim();
-    const password = document.getElementById("login-password").value;
-    const errorEl = document.getElementById("login-error");
-    errorEl.textContent = "";
-
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (e) {
-      errorEl.textContent = terjemahErrorFirebase(e.code);
-    }
-  });
-
-  // ---- LOGOUT ----
-  document.getElementById("btn-logout").addEventListener("click", async () => {
-    await signOut(auth);
-  });
-
-  // ---- PANTAU STATUS LOGIN ----
-  onAuthStateChanged(auth, async (user) => {
-    const registerBox = document.getElementById("register-box");
+   document.getElementById("register-box");
     const loginBox = document.getElementById("login-box");
     const userBox = document.getElementById("user-box");
 
@@ -2090,75 +2029,6 @@ window.loadPhotoLikes = async function() {
     <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
         <!-- Isi modal login Anda -->
     
-    <div class="p-6 pb-4 text-center border-b border-slate-100">
-      <h2 class="text-2xl font-extrabold text-slate-800">AFC LIFESCIENCE</h2>
-      <p class="text-xs text-slate-500 mt-1">Silakan masuk atau buat akun terlebih dahulu.</p>
-    </div>
-
-    <div class="p-6">
-      
-      <!-- TOMBOL GOOGLE -->
-      <button type="button" id="btn-google-login" class="w-full py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-slate-700 font-medium text-sm flex items-center justify-center gap-3 transition-all shadow-sm mb-4 active:scale-95">
-        <svg class="w-5 h-5" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-        </svg>
-        Lanjutkan dengan Google
-      </button>
-
-      <div class="relative flex py-1 items-center mb-4">
-        <div class="flex-grow border-t border-slate-200"></div>
-        <span class="flex-shrink mx-3 text-[11px] font-semibold text-slate-400 uppercase">Atau Email Manual</span>
-        <div class="flex-grow border-t border-slate-200"></div>
-      </div>
-
-      <!-- TAB SWITCHER -->
-      <div class="flex bg-slate-100 p-1 rounded-xl mb-5">
-        <button id="tab-login-btn" type="button" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-slate-800">Login</button>
-        <button id="tab-reg-btn" type="button" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500">Daftar</button>
-      </div>
-
-      <!-- FORM LOGIN -->
-      <div id="login-box" style="display: block;" class="space-y-4">
-        <input type="email" id="login-email" placeholder="nama@email.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
-        <input type="password" id="login-password" placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
-        <p id="login-error" class="text-xs text-red-500 font-medium empty:hidden bg-red-50 p-2.5 rounded-lg border border-red-100"></p>
-        <button id="btn-login" type="button" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm">Masuk</button>
-      </div>
-
-      <!-- FORM REGISTER -->
-      <div id="register-box" style="display: none;" class="space-y-4">
-        <input type="text" id="reg-username" placeholder="Username" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
-        <input type="email" id="reg-email" placeholder="nama@email.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
-        <input type="password" id="reg-password" placeholder="Password" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
-        <p id="reg-error" class="text-xs text-red-500 font-medium empty:hidden bg-red-50 p-2.5 rounded-lg border border-red-100"></p>
-        <button id="btn-register" type="button" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm">Daftar Akun Baru</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- SCRIPT LOGIC TAB -->
-<script>
-  function bukaTabLogin() {
-    document.getElementById('login-box').style.display = 'block';
-    document.getElementById('register-box').style.display = 'none';
-    document.getElementById('tab-login-btn').className = 'flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-slate-800';
-    document.getElementById('tab-reg-btn').className = 'flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500';
-  }
-
-  function bukaTabDaftar() {
-    document.getElementById('login-box').style.display = 'none';
-    document.getElementById('register-box').style.display = 'block';
-    document.getElementById('tab-reg-btn').className = 'flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-slate-800';
-    document.getElementById('tab-login-btn').className = 'flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500';
-  }
-
-  document.getElementById('tab-login-btn')?.addEventListener('click', bukaTabLogin);
-  document.getElementById('tab-reg-btn')?.addEventListener('click', bukaTabDaftar);
 </script>
 
 <!-- SCRIPT FIREBASE SDK v12 -->
@@ -2288,9 +2158,7 @@ googleProvider.setCustomParameters({
   const authOverlay = document.getElementById("auth-overlay");
   if (user) {
     if (authOverlay) authOverlay.style.display = "none";
-    
-    // TAMBAHKAN BARIS INI jika mau pindah ke halaman lain:
-    window.location.href = "dashboard.html"; // <-- Ganti nama file sesuai halaman tujuanmu
+   
     
   } else {
     if (authOverlay) authOverlay.style.display = "flex";
