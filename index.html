@@ -18,6 +18,31 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@600;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
+    authDomain: "web-afc.firebaseapp.com",
+    databaseURL: "https://web-afc-default-rtdb.firebaseio.com",
+    projectId: "web-afc",
+    storageBucket: "web-afc.firebasestorage.app",
+    messagingSenderId: "202313452502",
+    appId: "1:202313452502:web:57e2551bdab34ba3b1f277",
+    measurementId: "G-MZJ6DDCJCS"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -2050,9 +2075,20 @@ window.loadPhotoLikes = async function() {
   .tab-hidden { display: none !important; }
   .tab-visible { display: block !important; }
 </style>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AFC Lifescience - Auth</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .tab-hidden { display: none !important; }
+    .tab-visible { display: block !important; }
+  </style>
+
 <!-- OVERLAY MODAL LOGIN -->
-<div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-md p-4">
-  <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+<div id="auth-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-md p-4" style="display: none;">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden">
+        <!-- Isi modal login Anda -->
     
     <div class="p-6 pb-4 text-center border-b border-slate-100">
       <h2 class="text-2xl font-extrabold text-slate-800">AFC LIFESCIENCE</h2>
@@ -2061,8 +2097,8 @@ window.loadPhotoLikes = async function() {
 
     <div class="p-6">
       
-      <!-- TOMBOL GOOGLE (ONCLICK DIRECT BIAR RESPONSIF) -->
-      <button type="button" onclick="window.loginGoogle()" class="w-full py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-slate-700 font-medium text-sm flex items-center justify-center gap-3 transition-all shadow-sm mb-4 active:scale-95">
+      <!-- TOMBOL GOOGLE -->
+      <button type="button" id="btn-google-login" class="w-full py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-slate-700 font-medium text-sm flex items-center justify-center gap-3 transition-all shadow-sm mb-4 active:scale-95">
         <svg class="w-5 h-5" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -2078,11 +2114,13 @@ window.loadPhotoLikes = async function() {
         <div class="flex-grow border-t border-slate-200"></div>
       </div>
 
+      <!-- TAB SWITCHER -->
       <div class="flex bg-slate-100 p-1 rounded-xl mb-5">
-        <button id="tab-login-btn" type="button" onclick="bukaTabLogin()" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-slate-800">Login</button>
-        <button id="tab-reg-btn" type="button" onclick="bukaTabDaftar()" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500">Daftar</button>
+        <button id="tab-login-btn" type="button" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-slate-800">Login</button>
+        <button id="tab-reg-btn" type="button" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500">Daftar</button>
       </div>
 
+      <!-- FORM LOGIN -->
       <div id="login-box" style="display: block;" class="space-y-4">
         <input type="email" id="login-email" placeholder="nama@email.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
         <input type="password" id="login-password" placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
@@ -2090,6 +2128,7 @@ window.loadPhotoLikes = async function() {
         <button id="btn-login" type="button" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm">Masuk</button>
       </div>
 
+      <!-- FORM REGISTER -->
       <div id="register-box" style="display: none;" class="space-y-4">
         <input type="text" id="reg-username" placeholder="Username" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
         <input type="email" id="reg-email" placeholder="nama@email.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
@@ -2102,7 +2141,7 @@ window.loadPhotoLikes = async function() {
   </div>
 </div>
 
-<!-- SCRIPT PENUKAR TAB -->
+<!-- SCRIPT LOGIC TAB -->
 <script>
   function bukaTabLogin() {
     document.getElementById('login-box').style.display = 'block';
@@ -2117,11 +2156,15 @@ window.loadPhotoLikes = async function() {
     document.getElementById('tab-reg-btn').className = 'flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-slate-800';
     document.getElementById('tab-login-btn').className = 'flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500';
   }
+
+  document.getElementById('tab-login-btn')?.addEventListener('click', bukaTabLogin);
+  document.getElementById('tab-reg-btn')?.addEventListener('click', bukaTabDaftar);
 </script>
 
-<!-- SCRIPT FIREBASE LOGIC -->
+<!-- SCRIPT FIREBASE SDK v12 -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
   import { 
     getAuth, 
     createUserWithEmailAndPassword, 
@@ -2133,8 +2176,9 @@ window.loadPhotoLikes = async function() {
     signInWithRedirect,
     getRedirectResult
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+  import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
 
+  // Konfigurasi Firebase Anda (Sudah Lengkap dengan measurementId)
   const firebaseConfig = {
     apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
     authDomain: "web-afc.firebaseapp.com",
@@ -2142,46 +2186,56 @@ window.loadPhotoLikes = async function() {
     projectId: "web-afc",
     storageBucket: "web-afc.firebasestorage.app",
     messagingSenderId: "202313452502",
-    appId: "1:202313452502:web:57e2551bdab34ba3b1f277"
+    appId: "1:202313452502:web:57e2551bdab34ba3b1f277",
+    measurementId: "G-MZJ6DDCJCS"
   };
 
+  // Inisialisasi Firebase & Analytics
   const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
   const auth = getAuth(app);
   const db = getDatabase(app);
   const googleProvider = new GoogleAuthProvider();
 
-  // FUNGSI LOGIN GOOGLE DENGAN RESPON KILAT
-  window.loginGoogle = async function() {
-    alert("Menghubungkan ke Google..."); // KETERANGAN BAHWA TOMBOL SUDAH TERIKLIK!
-    
+// Tambahkan baris ini supaya selalu muncul pop-up pilih akun Google:
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
+  // FUNGSI LOGIN GOOGLE
+  async function prosesLoginGoogle() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      await set(ref(db, "users/" + user.uid), {
+      // Simpan/Update data user di Database
+      await update(ref(db, "users/" + user.uid), {
         username: user.displayName || user.email.split('@')[0],
         email: user.email,
-        createdAt: new Date().toISOString()
+        lastLogin: new Date().toISOString()
       });
 
     } catch (e) {
       if (e.code === "auth/popup-blocked" || e.code === "auth/popup-closed-by-user") {
-        alert("Popup diblokir HP, mengalihkan halaman ke Google...");
         await signInWithRedirect(auth, googleProvider);
       } else {
-        alert("Sebab Gagal Login: " + e.code + "\nPesan: " + e.message);
+        alert("Gagal Login Google (" + e.code + "): " + e.message);
       }
     }
-  };
+  }
 
-  // Tangkap hasil login dari Redirect (Khusus HP yang memblokir popup)
+  // Event Listener tombol Google Login
+  document.getElementById("btn-google-login")?.addEventListener("click", () => {
+    prosesLoginGoogle();
+  });
+
+  // Tangkap redirect login Google (untuk perangkat yang memblokir Popup)
   getRedirectResult(auth).then(async (result) => {
     if (result && result.user) {
       const user = result.user;
-      await set(ref(db, "users/" + user.uid), {
+      await update(ref(db, "users/" + user.uid), {
         username: user.displayName || user.email.split('@')[0],
         email: user.email,
-        createdAt: new Date().toISOString()
+        lastLogin: new Date().toISOString()
       });
     }
   }).catch((e) => {
@@ -2203,7 +2257,11 @@ window.loadPhotoLikes = async function() {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await set(ref(db, "users/" + userCredential.user.uid), { username, email, createdAt: new Date().toISOString() });
+      await set(ref(db, "users/" + userCredential.user.uid), { 
+        username, 
+        email, 
+        createdAt: new Date().toISOString() 
+      });
       alert("Registrasi berhasil! Silakan Login.");
       bukaTabLogin();
     } catch (e) {
@@ -2225,12 +2283,7 @@ window.loadPhotoLikes = async function() {
     }
   });
 
-  // LOGOUT
-  document.getElementById("btn-logout")?.addEventListener("click", async () => {
-    await signOut(auth);
-  });
-
-  // PANTAU STATUS LOGIN
+  // STATUS LOGIN (STATE LISTENER)
   onAuthStateChanged(auth, async (user) => {
     const authOverlay = document.getElementById("auth-overlay");
     if (user) {
@@ -2255,6 +2308,12 @@ window.loadPhotoLikes = async function() {
       default: return "Terjadi kesalahan: " + code;
     }
   }
+
+// Fungsi untuk membuka modal login saat tombol di-klik
+function bukaModalLogin() {
+    const authOverlay = document.getElementById("auth-overlay");
+    if (authOverlay) authOverlay.style.display = "flex";
+}
 </script>
 
 </body>
