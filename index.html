@@ -2285,17 +2285,17 @@ googleProvider.setCustomParameters({
 
   // STATUS LOGIN (STATE LISTENER)
   onAuthStateChanged(auth, async (user) => {
-    const authOverlay = document.getElementById("auth-overlay");
-    if (user) {
-      if (authOverlay) authOverlay.style.display = "none";
-      const snapshot = await get(ref(db, "users/" + user.uid));
-      const username = snapshot.exists() ? snapshot.val().username : (user.displayName || user.email);
-      const userNameEl = document.getElementById("user-name");
-      if(userNameEl) userNameEl.textContent = username;
-    } else {
-      if (authOverlay) authOverlay.style.display = "flex";
-    }
-  });
+  const authOverlay = document.getElementById("auth-overlay");
+  if (user) {
+    if (authOverlay) authOverlay.style.display = "none";
+    
+    // TAMBAHKAN BARIS INI jika mau pindah ke halaman lain:
+    window.location.href = "dashboard.html"; // <-- Ganti nama file sesuai halaman tujuanmu
+    
+  } else {
+    if (authOverlay) authOverlay.style.display = "flex";
+  }
+});
 
   function terjemahErrorFirebase(code) {
     switch (code) {
