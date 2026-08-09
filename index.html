@@ -2117,7 +2117,7 @@ window.loadPhotoLikes = async function() {
 
   googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-// 1. FITUR LOGIN GOOGLE (SUDAH DIPERBAIKI)
+// 1. FITUR LOGIN GOOGLE (PERBAIKAN SOLUSI DATABASE)
 document.getElementById("btn-google-login")?.addEventListener("click", async () => {
   const btn = document.getElementById("btn-google-login");
   const errorEl = document.getElementById("login-error");
@@ -2129,31 +2129,26 @@ document.getElementById("btn-google-login")?.addEventListener("click", async () 
       btn.style.opacity = "0.7";
     }
 
-    // Membuka pop-up autentikasi Google
+    // 1. Membuka pop-up autentikasi Google
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
 
-    // Simpan data pengguna ke Database (diberi try-catch terpisah agar tidak bikin error)
-    try {
-      await set(ref(db, "users/" + user.uid), {
-        username: user.displayName || "Google User",
-        email: user.email,
-        emailVerified: user.emailVerified,
-        lastLogin: new Date().toISOString()
-      });
-    } catch (dbErr) {
-      console.warn("Peringatan simpan database:", dbErr);
-    }
-
-    // Otomatis menutup modal/pop-up login setelah berhasil
+    // 2. KUNCI PERBAIKAN: Langsung tutup modal login karena Google Auth SUDAH SUKSES!
     const authOverlay = document.getElementById("auth-overlay");
     if (authOverlay) {
       authOverlay.style.display = "none";
     }
 
+    // 3. Simpan data pengguna ke Database secara Latar Belakang (Tidak memblokir Login)
+    set(ref(db, "users/" + user.uid), {
+      username: user.displayName || "Google User",
+      email: user.email,
+      emailVerified: user.emailVerified,
+      lastLogin: new Date().toISOString()
+    }).catch(dbErr => console.warn("Peringatan Database:", dbErr));
+
   } catch (error) {
     console.error("Error Login Google:", error);
-    // Abaikan jika pengguna menutup popup secara manual
     if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
       if (errorEl) {
         errorEl.textContent = terjemahErrorFirebase(error);
