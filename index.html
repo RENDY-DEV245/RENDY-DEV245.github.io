@@ -2024,7 +2024,24 @@ window.loadPhotoLikes = async function() {
   <div id="login-box" style="display: block;" class="space-y-4">
     <input type="email" id="login-email" placeholder="nama@email.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-red-500">
     <input type="password" id="login-password" placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-red-500">
-    
+
+<div class="flex items-start gap-2.5 text-left bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+      <input type="checkbox" id="chk-notif-consent" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
+      <label for="chk-notif-consent" class="text-[11px] text-slate-600 cursor-pointer leading-tight">
+        Saya menyetujui untuk menerima <span class="font-bold text-slate-800">Notifikasi Push / Info Promo & Akun</span>. <span class="text-red-500 font-bold">(Wajib)</span>
+      </label>
+    </div>
+    <!-- ⬆️ AKHIR TAMBAHAN CHECKBOX ⬆️ -->
+
+    <div class="flex justify-between items-center text-xs">
+      <span class="text-slate-400">Lupa kata sandi Anda?</span>
+      <button type="button" onclick="bukaTabLupaPassword()" class="font-bold text-red-600 hover:underline">Lupa Password?</button>
+    </div>
+
+    <p id="login-error" class="text-xs text-red-500 font-medium empty:hidden bg-red-50 p-2.5 rounded-lg border border-red-100"></p>
+    <button id="btn-login" type="button" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm transition">Masuk</button>
+  </div>
+      
     <div class="flex justify-between items-center text-xs">
       <span class="text-slate-400">Lupa kata sandi Anda?</span>
       <button type="button" onclick="bukaTabLupaPassword()" class="font-bold text-red-600 hover:underline">Lupa Password?</button>
@@ -2344,14 +2361,31 @@ window.loadPhotoLikes = async function() {
     }
   });
 
-  // 8. LOGIN MANUAL EMAIL & PASSWORD
+  // 8. LOGIN MANUAL EMAIL & PASSWORD (DENGAN VALIDASI CENTANG NOTIFIKASI)
   document.getElementById("btn-login")?.addEventListener("click", async () => {
     const email = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-password").value;
+    const chkConsent = document.getElementById("chk-notif-consent");
     const errorEl = document.getElementById("login-error");
     errorEl.textContent = "";
 
+    // Validasi input
+    if (!email || !password) {
+      errorEl.textContent = "Silakan isi email dan password Anda.";
+      return;
+    }
+
+    // Validasi Wajib Centang Notifikasi FCM
+    if (!chkConsent || !chkConsent.checked) {
+      errorEl.textContent = "Anda wajib mencentang persetujuan izin notifikasi untuk melanjutkan masuk.";
+      return;
+    }
+
     try {
+      // Minta izin notifikasi browser secara langsung akibat gesture klik user
+      await setupPushNotification();
+
+      // Lanjutkan Login Firebase
       await signInWithEmailAndPassword(auth, email, password);
     } catch (e) {
       errorEl.textContent = terjemahErrorFirebase(e.code);
