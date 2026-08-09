@@ -1503,20 +1503,113 @@ const PRODUCT_DATABASE = {
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
             }
 
+            // Responsif: perkecil panel di layar HP
+                this.updateCharacterScale();
+                window.addEventListener('resize', () => this.updateCharacterScale());
+
+                // Auto ganti karakter tiap 3.5 detik, dengan efek fade
+                this.characterTimer = setInterval(() => this.swapCharacter(), 3500);
+
+                // Particle System
+                const geo = new THREE.SphereGeometry(0.08, 8, 8);
+                const mat = new THREE.MeshBasicMaterial({ color: 0xD4AF37 });
+
+                for (let i = 0; i < 70; i++) {
+                    const particle = new THREE.Mesh(geo, mat);
+                    particle.position.set(
+                        (Math.random() - 0.5) * 20,
+                        (Math.random() - 0.5) * 20,
+                        (Math.random() - 0.5) * 10
+                    );
+                    particle.userData = {
+                        speedY: 0.003 + Math.random() * 0.005,
+                        speedX: (Math.random() - 0.5) * 0.002
+                    };
+                    this.particles.push(particle);
+                    this.scene.add(particle);
+                }
+
+                window.addEventListener('resize', () => this.onResize());
+
+                // Interaction with GSAP Scroll
+                if (window.gsap && window.ScrollTrigger) {
+                    gsap.to(this.camera.position, {
+                        z: 14,
+                        y: -3,
+                        scrollTrigger: {
+                            trigger: "body",
+                            start: "top top",
+                            end: "bottom bottom",
+                            scrub: 2
+                        }
+                    });
+
+                    // Makin di-scroll ke bawah, angin makin kencang
+                    gsap.to(this.mesh3D.material.uniforms.uWind, {
+                        value: 2.2,
+                        scrollTrigger: {
+                            trigger: "body",
+                            start: "top top",
+                            end: "bottom bottom",
+                            scrub: 1.5
+                        }
+                    });
+                }
+
+                this.animate();
+            }
+
+            onResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.updateCharacterScale();
+            }
+
+            // Bikin ukuran panel karakter menyesuaikan lebar layar (responsif)
+            updateCharacterScale() {
+                if (!this.mesh3D) return;
+                const w = window.innerWidth;
+                let scale = 1;
+                if (w < 480) scale = 0.55;
+                else if (w < 768) scale = 0.75;
+                else if (w < 1024) scale = 0.9;
+                this.mesh3D.scale.set(scale, scale, scale);
+            }
+
+            // Ganti gambar karakter dengan efek fade out -> ganti tekstur -> fade in
+            swapCharacter() {
+                if (!this.mesh3D || !window.gsap) return;
+                this.characterIndex = (this.characterIndex + 1) % this.characterImages.length;
+                const nextSrc = this.characterImages[this.characterIndex];
+                const uniforms = this.mesh3D.material.uniforms;
+
+                gsap.to(uniforms.uOpacity, {
+                    value: 0,
+                    duration: 0.4,
+                    onComplete: () => {
+                        this.textureLoader.load(nextSrc, (tex) => {
+                            tex.colorSpace = THREE.SRGBColorSpace;
+                            uniforms.uTexture.value = tex;
+                            gsap.to(uniforms.uOpacity, { value: 0.92, duration: 0.4 });
+                        });
+                    }
+                });
+            }
+
             animate() {
                 requestAnimationFrame(() => this.animate());
 
                 if (this.mesh3D) {
-                    this.mesh3D.rotation.x += 0.002;
-                    this.mesh3D.rotation.y += 0.003;
-                }
+                    // Oscillate pelan (bukan puter 360) biar gambar karakter selalu kelihatan jelas & persis
+                    const t = Date.now() * 0.0006;
+                    this.mesh3D.rotation.y = Math.sin(t) * 0.35;
+                    this.mesh3D.rotation.x = Math.sin(t * 0.7) * 0.08;
+                    this.mesh3D.position.y = Math.sin(t * 1.3) * 0.15;
 
-                this.particles.forEach(p => {
-                    p.position.y += p.userData.speedY;
-                    p.position.x += p.userData.speedX;
-
-                    if (p.position.y > 10) p.position.y = -10;
-                });
+                    // Update waktu buat shader angin rambut
+                    this.mesh3D.material.uniforms.uTime.value = this.clock.getElapsedTime();
+        }
 
                 this.renderer.render(this.scene, this.camera);
             }
