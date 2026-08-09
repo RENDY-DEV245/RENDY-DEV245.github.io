@@ -83,6 +83,12 @@
 </head>
 <body class="bg-lightBg font-sans text-slate-800 antialiased selection:bg-afcGold selection:text-white">
 
+<script>
+window.addEventListener('error', function(e) {
+  alert('JS Error: ' + e.message + '\nFile: ' + e.filename + '\nBaris: ' + e.lineno);
+});
+</script>
+    
     <!-- HEADER & NAVBAR CERAH -->
     <header class="fixed top-0 left-0 w-full glass-header z-40 shadow-sm transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
