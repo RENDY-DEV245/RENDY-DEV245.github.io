@@ -1299,8 +1299,8 @@ const PRODUCT_DATABASE = {
             }
         }
 
-        class CartStore {
-        class CartStore {
+        
+    class CartStore {
     constructor() {
         this.items = JSON.parse(localStorage.getItem('afc_cart_items') || '[]');
         this.listeners = [];
@@ -1358,36 +1358,7 @@ const PRODUCT_DATABASE = {
         this.listeners.push(listener);
     }
 
-    notify() {
-        this.listeners.forEach(fn => fn(this.items));
-    }
-
-    saveAndNotify(status = 'active') {
-        localStorage.setItem('afc_cart_items', JSON.stringify(this.items));
-        this.notify();
-        this.syncToFirebase(status);
-    }
-
-    async syncToFirebase(status) {
-        if (!this.currentUser) return;
-        try {
-            if (window.firebaseDB && window.refFn && window.setFn) {
-                await window.setFn(window.refFn(window.firebaseDB, 'abandoned_carts/' + this.currentUser.uid), {
-                    userId: this.currentUser.uid,
-                    email: this.currentUser.email || '',
-                    items: this.items,
-                    totalPrice: this.getTotal(),
-                    totalQty: this.getTotalQty(),
-                    status: status, // 'active', 'completed', 'cleared', atau 'abandoned'
-                    updatedAt: new Date().toISOString()
-                });
-            }
-        } catch (err) {
-            console.warn("Gagal sync keranjang ke Firebase:", err);
-        }
-    }
-        }
-
+    
         class ModalController {
             constructor(cartStore) {
                 this.cartStore = cartStore;
@@ -2293,6 +2264,10 @@ if (window.app && window.app.processCheckout) {
   const db = getDatabase(app);
   const messaging = getMessaging(app);
 
+window.firebaseDB = db;
+window.refFn = ref;
+window.setFn = set;
+    
   // Tampilkan notifikasi saat website SEDANG DIBUKA (foreground)
   onMessage(messaging, (payload) => {
     console.log("Pesan FCM diterima (foreground):", payload);
