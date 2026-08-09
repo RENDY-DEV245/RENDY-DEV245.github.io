@@ -1,7 +1,8 @@
-importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
+// firebase-messaging-sw.js
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-// Inisialisasi Firebase Config AFC
+// Konfigurasi Firebase Anda
 firebase.initializeApp({
   apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
   authDomain: "web-afc.firebaseapp.com",
@@ -14,24 +15,15 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Menangani notifikasi saat browser/tab ditutup (Background)
+// Menangani notifikasi saat browser ditutup / tidak aktif
 messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Background message received: ', payload);
-  const notificationTitle = payload.notification.title || 'AFC Lifescience';
+  console.log('[firebase-messaging-sw.js] Pesan background diterima:', payload);
+
+  const notificationTitle = payload.notification?.title || 'Notifikasi AFC Lifescience';
   const notificationOptions = {
-    body: payload.notification.body || '',
-    icon: payload.notification.icon || 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg',
-    data: payload.data
+    body: payload.notification?.body || 'Anda mendapat pesan baru.',
+    icon: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg'
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
-});
-
-// Ketika notifikasi diklik, buka link URL dari custom data
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  const targetUrl = event.notification.data?.url || '/';
-  event.waitUntil(
-    clients.openWindow(targetUrl)
-  );
 });
