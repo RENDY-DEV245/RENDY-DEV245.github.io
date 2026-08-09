@@ -1510,47 +1510,149 @@ const PRODUCT_DATABASE = {
 
            
 
-                // Particle System
-                const geo = new THREE.SphereGeometry(0.08, 8, 8);
-                const mat = new THREE.MeshBasicMaterial({ color: 0xD4AF37 });
+class Three3DWorld {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                if (!this.container) return;
 
-                for (let i = 0; i < 70; i++) {
-                    const particle = new THREE.Mesh(geo, mat);
-                    particle.position.set(
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                this.particles = [];
+                this.mesh3D = null;
+
+                this.init();
+            }
+
+            init() {
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.container.appendChild(this.renderer.domElement);
+
+                this.camera.position.z = 10;
+
+                // ===== 3D CHARACTER SLIDER =====
+                this.characterImages = [
+                    'https://i.ibb.co.com/1JfPr3TZ/1786283691934.png',
+                    'https://i.ibb.co.com/1JfPr3TZ/1786283691934.png'
+                ];
+                this.characterIndex = 0;
+                this.clock = new THREE.Clock();
+
+                this.textureLoader = new THREE.TextureLoader();
+                const firstTexture = this.textureLoader.load(this.characterImages[0]);
+                firstTexture.colorSpace = THREE.SRGBColorSpace;
+
+                // Geometry panel karakter
+                const geometry = new THREE.PlaneGeometry(6.5, 8.5, 48, 64);
+                
+                // Shader custom: efek rambut bergoyang ketiup angin
+                const windVertexShader = `
+                    uniform float uTime;
+                    uniform float uWind;
+                    varying vec2 vUv;
+                    void main() {
+                        vUv = uv;
+                        vec3 pos = position;
+
+                        float hairMask = pow(uv.y, 3.0);
+                        float wave1 = sin(pos.y * 5.5 + uTime * 3.0) * 0.16;
+                        float wave2 = sin(pos.y * 2.5 - uTime * 1.8 + pos.x) * 0.09;
+                        float gust  = sin(uTime * 0.8) * 0.5 + 0.5;
+
+                        pos.x += (wave1 + wave2) * uWind * hairMask * (0.6 + gust * 0.6);
+                        pos.z += cos(pos.y * 4.0 + uTime * 2.2) * 0.14 * uWind * hairMask;
+
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                    }
+                `;
+                const windFragmentShader = `
+                    uniform sampler2D uTexture;
+                    uniform float uOpacity;
+                    varying vec2 vUv;
+                    void main() {
+                        vec4 tex = texture2D(uTexture, vUv);
+                        if (tex.a < 0.05) discard;
+                        gl_FragColor = vec4(tex.rgb, tex.a * uOpacity);
+                    }
+                `;
+
+                const material = new THREE.ShaderMaterial({
+                    uniforms: {
+                        uTexture: { value: firstTexture },
+                        uTime: { value: 0 },
+                        uWind: { value: 0.6 },
+                        uOpacity: { value: 0.92 }
+                    },
+                    vertexShader: windVertexShader,
+                    fragmentShader: windFragmentShader,
+                    transparent: true,
+                    side: THREE.DoubleSide
+                });
+                
+                this.mesh3D = new THREE.Mesh(geometry, material);
+                // Posisi Y disesuaikan (-0.8) agar bagian bawah badan pas menyentuh perbatasan
+                this.mesh3D.position.set(2.2, -0.8, 0);
+                this.scene.add(this.mesh3D);
+
+                this.updateCharacterScale();
+                window.addEventListener('resize', () => this.updateCharacterScale());
+
+                // Auto ganti karakter tiap 3.5 detik
+                this.characterTimer = setInterval(() => this.swapCharacter(), 3500);
+
+                // ===== PARTICLE SYSTEM DAUN SAKURA (GANTI BULATAN COKELAT) =====
+                const petalShape = new THREE.Shape();
+                petalShape.moveTo(0, 0);
+                petalShape.bezierCurveTo(0.1, 0.2, 0.25, 0.35, 0.2, 0.6);
+                petalShape.bezierCurveTo(0.15, 0.75, -0.15, 0.75, -0.2, 0.6);
+                petalShape.bezierCurveTo(-0.25, 0.35, -0.1, 0.2, 0, 0);
+
+                const petalGeo = new THREE.ShapeGeometry(petalShape);
+                const sakuraColors = [0xFFB7C5, 0xFFC0CB, 0xFF69B4, 0xFFE4E1, 0xFFA07A];
+
+                for (let i = 0; i < 75; i++) {
+                    const randomColor = sakuraColors[Math.floor(Math.random() * sakuraColors.length)];
+                    const petalMat = new THREE.MeshBasicMaterial({
+                        color: randomColor,
+                        side: THREE.DoubleSide,
+                        transparent: true,
+                        opacity: 0.7 + Math.random() * 0.3
+                    });
+
+                    const petal = new THREE.Mesh(petalGeo, petalMat);
+                    const scale = 0.3 + Math.random() * 0.4;
+                    petal.scale.set(scale, scale, scale);
+
+                    petal.position.set(
                         (Math.random() - 0.5) * 20,
-                        (Math.random() - 0.5) * 20,
-                        (Math.random() - 0.5) * 10
+                        (Math.random() - 0.5) * 14 + 1,
+                        (Math.random() - 0.5) * 8
                     );
-                    particle.userData = {
-                        speedY: 0.003 + Math.random() * 0.005,
-                        speedX: (Math.random() - 0.5) * 0.002
+
+                    petal.userData = {
+                        speedY: 0.008 + Math.random() * 0.012,
+                        speedX: (Math.random() - 0.5) * 0.006,
+                        rotSpeedX: Math.random() * 0.03,
+                        rotSpeedY: Math.random() * 0.03,
+                        rotSpeedZ: Math.random() * 0.02,
+                        swayOffset: Math.random() * Math.PI * 2
                     };
-                    this.particles.push(particle);
-                    this.scene.add(particle);
+
+                    this.particles.push(petal);
+                    this.scene.add(petal);
                 }
 
                 window.addEventListener('resize', () => this.onResize());
 
-                // Interaction with GSAP Scroll
+                // Interaction dengan Scroll (Kamera TIDAK meluncur ke bawah lagi)
                 if (window.gsap && window.ScrollTrigger) {
-                    gsap.to(this.camera.position, {
-                        z: 14,
-                        y: -3,
-                        scrollTrigger: {
-                            trigger: "body",
-                            start: "top top",
-                            end: "bottom bottom",
-                            scrub: 2
-                        }
-                    });
-
-                    // Makin di-scroll ke bawah, angin makin kencang
                     gsap.to(this.mesh3D.material.uniforms.uWind, {
                         value: 2.2,
                         scrollTrigger: {
-                            trigger: "body",
+                            trigger: "#beranda",
                             start: "top top",
-                            end: "bottom bottom",
+                            end: "bottom top",
                             scrub: 1.5
                         }
                     });
@@ -1566,18 +1668,16 @@ const PRODUCT_DATABASE = {
                 this.updateCharacterScale();
             }
 
-            // Bikin ukuran panel karakter menyesuaikan lebar layar (responsif)
             updateCharacterScale() {
                 if (!this.mesh3D) return;
                 const w = window.innerWidth;
-                let scale = 1.6;
+                let scale = 1.65;
                 if (w < 480) scale = 1.1;
                 else if (w < 768) scale = 1.35;
                 else if (w < 1024) scale = 1.5;
                 this.mesh3D.scale.set(scale, scale, scale);
-        }
+            }
 
-            // Ganti gambar karakter dengan efek fade out -> ganti tekstur -> fade in
             swapCharacter() {
                 if (!this.mesh3D || !window.gsap) return;
                 this.characterIndex = (this.characterIndex + 1) % this.characterImages.length;
@@ -1600,16 +1700,30 @@ const PRODUCT_DATABASE = {
             animate() {
                 requestAnimationFrame(() => this.animate());
 
-                if (this.mesh3D) {
-                    // Oscillate pelan (bukan puter 360) biar gambar karakter selalu kelihatan jelas & persis
-                    const t = Date.now() * 0.0006;
-                    this.mesh3D.rotation.y = Math.sin(t) * 0.35;
-                    this.mesh3D.rotation.x = Math.sin(t * 0.7) * 0.08;
-                    this.mesh3D.position.y = Math.sin(t * 1.3) * 0.15;
+                const time = this.clock.getElapsedTime();
 
-                    // Update waktu buat shader angin rambut
-                    this.mesh3D.material.uniforms.uTime.value = this.clock.getElapsedTime();
-        }
+                // Animasi goyang halus karakter
+                if (this.mesh3D) {
+                    this.mesh3D.rotation.y = Math.sin(time * 0.8) * 0.25;
+                    this.mesh3D.rotation.x = Math.sin(time * 0.6) * 0.05;
+                    this.mesh3D.position.y = -0.8 + Math.sin(time * 1.2) * 0.1;
+                    this.mesh3D.material.uniforms.uTime.value = time;
+                }
+
+                // Animasi Daun Sakura Melayang & Gugur
+                this.particles.forEach(p => {
+                    p.position.y -= p.userData.speedY;
+                    p.position.x += Math.sin(time * 2 + p.userData.swayOffset) * 0.008 + p.userData.speedX;
+                    p.rotation.x += p.userData.rotSpeedX;
+                    p.rotation.y += p.userData.rotSpeedY;
+                    p.rotation.z += p.userData.rotSpeedZ;
+
+                    // Jika daun sudah menyentuh batas bawah, kembalikan ke atas
+                    if (p.position.y < -6) {
+                        p.position.y = 7;
+                        p.position.x = (Math.random() - 0.5) * 20;
+                    }
+                });
 
                 this.renderer.render(this.scene, this.camera);
             }
