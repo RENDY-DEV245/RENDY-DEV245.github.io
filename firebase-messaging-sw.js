@@ -15,15 +15,40 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Menangani notifikasi saat browser ditutup / tidak aktif
+// Menangani notifikasi saat browser ditutup / tidak aktif (Pesan Umum & Abandoned Cart)
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Pesan background diterima:', payload);
 
   const notificationTitle = payload.notification?.title || 'Notifikasi AFC Lifescience';
   const notificationOptions = {
     body: payload.notification?.body || 'Anda mendapat pesan baru.',
-    icon: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg'
+    icon: payload.notification?.icon || 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg',
+    badge: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg',
+    data: {
+      url: payload.data?.url || '/' // Mengambil URL tujuan jika ada di payload
+    }
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// Menangani Aksi Klik Notifikasi (Membuka / Mengarahkan Pengguna Kembali ke Website)
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  const targetUrl = event.notification.data?.url || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // Jika tab website sudah terbuka, langsung fokus ke tab tersebut
+      for (let client of windowClients) {
+        if (client.url === targetUrl && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // Jika tab belum terbuka, buka tab/jendela baru
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
 });
