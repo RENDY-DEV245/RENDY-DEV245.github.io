@@ -33,6 +33,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
+<!-- EmailJS Browser SDK Resmi -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    
     <script>
         tailwind.config = {
             theme: {
@@ -2121,16 +2124,12 @@ window.loadPhotoLikes = async function() {
 
   let pendingRegistrationData = null;
 
-  // 1. LOGIN GOOGLE
-  document.getElementById("btn-google-login")?.addEventListener("click", async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error) {
-      alert("Login Google gagal: " + error.message);
-    }
-  });
+  // Inisialisasi EmailJS SDK Resmi
+  if (window.emailjs) {
+    emailjs.init("sFzLru6fytB-WGPjN");
+  }
 
-  // 2. REGISTER DENGAN OTP EMAILJS
+  // 2. REGISTER DENGAN OTP EMAILJS (SDK RESMI)
   document.getElementById("btn-register")?.addEventListener("click", async () => {
     const username = document.getElementById("reg-username").value.trim();
     const email = document.getElementById("reg-email").value.trim();
@@ -2161,36 +2160,25 @@ window.loadPhotoLikes = async function() {
 
       pendingRegistrationData = { email, cleanEmail };
 
-      const emailData = {
-        service_id: EMAILJS_SERVICE_ID,
-        template_id: EMAILJS_TEMPLATE_ID,
-        user_id: EMAILJS_PUBLIC_KEY,
-        template_params: {
-          to_email: email,
-          to_name: username,
-          otp_code: generatedOTP
-        }
-      };
-
-      const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(emailData)
+      // Kirim Email OTP menggunakan SDK Resmi EmailJS
+      const response = await emailjs.send("service_eqwhihi", "template_gy966lh", {
+        to_email: email,
+        to_name: username,
+        otp_code: generatedOTP
       });
 
-      if (res.ok) {
-        bukaTabOTP();
-      } else {
-        errorEl.textContent = "Gagal mengirim email OTP. Periksa konfigurasi EmailJS Anda.";
-      }
-    } catch (e) {
-      errorEl.textContent = terjemahErrorFirebase(e.code || e.message);
+      console.log("SUCCESS EMAILJS:", response);
+      bukaTabOTP();
+
+    } catch (err) {
+      console.error("ERROR EMAILJS:", err);
+      const pesanError = err.text || err.message || JSON.stringify(err);
+      errorEl.textContent = "Gagal Kirim Email: " + pesanError;
     } finally {
       btnRegister.disabled = false;
       btnRegister.innerText = "Daftar & Kirim OTP Email";
     }
   });
-
   // 3. VERIFIKASI KODE OTP
   document.getElementById("btn-verify-otp")?.addEventListener("click", async () => {
     const inputOTP = document.getElementById("otp-input").value.trim();
