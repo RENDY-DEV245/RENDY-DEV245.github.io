@@ -2184,45 +2184,31 @@ window.loadPhotoLikes = async function() {
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
         const token = await getToken(messaging, { 
-          vapidKey: "BPaGr4BDKVjmQhNRHP3RfHhglvLLYY8zVbNF0_u5-84GiRH-hiwnFdBZgVL-WFbcJ7RpDNTwjyCy9W8N_HL8UXI" );
-    }
-
-
-    // 1. Minta Izin Notification Native Browser
-    let permission = Notification.permission;
-    if (permission === 'default') {
-      permission = await Notification.requestPermission();
-    }
-
-    // 2. Jika Pengguna Memang Benar-Benar MEMBLOKIR / MENOLAK
-    if (permission !== 'granted') {
-      if (permission === 'denied') {
-        alert("Akses Notifikasi DIBLOKIR di setelan browser Anda.\n\nUntuk mengizinkan:\n1. Klik ikon GEMBOK 🔒 di sebelah kiri URL alamat web.\n2. Ubah Notifikasi menjadi 'IZINKAN'.\n3. Coba login lagi.");
-      }
-      return false; // Pengguna memang menolak/memblokir
-    }
-
-    // 3. JIKA PENGGUNA PILIH "IZINKAN" -> LANGSUNG RETURN TRUE (LOGIN LULUS 100%)!
-    // Pengambilan FCM Token dilakukan di background agar tidak menggagalkan login jika ada error SW/Network
-    (async () => {
-      try {
-        const token = await getToken(messaging, { 
           vapidKey: "BPaGr4BDKVjmQhNRHP3RfHhglvLLYY8zVbNF0_u5-84GiRH-hiwnFdBZgVL-WFbcJ7RpDNTwjyCy9W8N_HL8UXI" 
         });
 
-        if (token && userId) {
-          await set(ref(db, "fcm_tokens/" + userId), {
-            token: token,
-            updatedAt: new Date().toISOString()
-          });
+        if (token) {
+          console.log("FCM TOKEN KAMU:", token);
+          if (userId) {
+            await set(ref(db, "fcm_tokens/" + userId), {
+              token: token,
+              updatedAt: new Date().toISOString()
+            });
+          }
         }
-      } catch (tokenErr) {
-        console.warn("Info: User sudah Izinkan, tapi FCM Token gagal diambil di background:", tokenErr);
+      } else {
+        console.log("Izin push notification ditolak user.");
       }
-    })();
-
-    return true; // USER SUDAH TEKAN IZINKAN! AKSEPTASI LOGIN DITERIMA!
+    } catch (err) {
+      console.error("Gagal mengambil FCM Token:", err);
     }
+  }
+
+  // TERIMA NOTIFIKASI SAAT WEB DIBUKA (Foreground)
+  onMessage(messaging, (payload) => {
+    console.log("Pesan masuk saat web dibuka:", payload);
+    alert(`${payload.notification.title}\n${payload.notification.body}`);
+  });
     
   // 5. FITUR LOGIN GOOGLE (WAJIB CENTANG & IZINKAN NOTIFIKASI)
   document.getElementById("btn-google-login")?.addEventListener("click", async () => {
