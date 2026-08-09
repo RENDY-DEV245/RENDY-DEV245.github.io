@@ -2133,37 +2133,24 @@ async function prosesLoginGoogle() {
     }
 });
 
-  // STATUS LOGIN (STATE LISTENER)
-style.setProperty("display", "none", "important");
+// STATUS LOGIN (STATE LISTENER)
+onAuthStateChanged(auth, (user) => {
+    const authOverlay = document.getElementById("auth-overlay");
 
     if (user) {
-        // LOGIN BERHASIL
-        console.log("LOGIN BERHASIL:", user.email);
+        console.log("USER SUDAH LOGIN:", user.email);
 
         if (authOverlay) {
             authOverlay.classList.add("hidden");
-            authOverlay.style.display = "none";
-        }
-
-        // Ambil data user dari Firebase Realtime Database
-        try {
-            const snapshot = await get(ref(db, "users/" + user.uid));
-
-            if (snapshot.exists()) {
-                const userData = snapshot.val();
-                console.log("DATA USER:", userData);
-            }
-        } catch (error) {
-            console.error("Gagal mengambil data user:", error);
+            authOverlay.style.setProperty("display", "none", "important");
         }
 
     } else {
-        // BELUM LOGIN
-        console.log("BELUM LOGIN");
+        console.log("USER BELUM LOGIN");
 
         if (authOverlay) {
             authOverlay.classList.remove("hidden");
-            authOverlay.style.display = "flex";
+            authOverlay.style.setProperty("display", "flex", "important");
         }
     }
 });
