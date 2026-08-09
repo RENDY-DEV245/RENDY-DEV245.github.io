@@ -2060,7 +2060,7 @@ googleProvider.setCustomParameters({
 });
   // FUNGSI LOGIN GOOGLE
 async function prosesLoginGoogle() {
-  await signInWithRedirect(auth, googleProvider);
+    await signInWithRedirect(auth, googleProvider);
 }
 
   // Event Listener tombol Google Login
@@ -2134,8 +2134,7 @@ async function prosesLoginGoogle() {
 });
 
   // STATUS LOGIN (STATE LISTENER)
-onAuthStateChanged(auth, async (user) => {
-    const authOverlay = document.getElementById("auth-overlay");
+style.setProperty("display", "none", "important");
 
     if (user) {
         // LOGIN BERHASIL
