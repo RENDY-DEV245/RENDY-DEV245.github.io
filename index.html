@@ -2008,6 +2008,14 @@ window.loadPhotoLikes = async function() {
     Lanjutkan dengan Google
   </button>
 
+<!-- CHECKBOX IZIN NOTIFIKASI GLOBAL -->
+  <div class="mt-3 mb-2 flex items-start gap-2.5 text-left bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+    <input type="checkbox" id="chk-notif-consent" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
+    <label for="chk-notif-consent" class="text-[11px] text-slate-600 cursor-pointer leading-tight">
+      Saya menyetujui untuk menerima <span class="font-bold text-slate-800">Notifikasi Push / Info Promo & Akun</span>. <span class="text-red-500 font-bold">(Wajib)</span>
+    </label>
+  </div>
+    
   <div class="relative flex py-1 items-center mb-4">
     <div class="flex-grow border-t border-slate-200"></div>
     <span class="flex-shrink mx-3 text-[11px] font-semibold text-slate-400 uppercase">Atau Email Manual</span>
@@ -2028,7 +2036,7 @@ window.loadPhotoLikes = async function() {
 <div class="flex items-start gap-2.5 text-left bg-slate-50 p-2.5 rounded-xl border border-slate-200">
       <input type="checkbox" id="chk-notif-consent" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
       <label for="chk-notif-consent" class="text-[11px] text-slate-600 cursor-pointer leading-tight">
-        Saya menyetujui untuk menerima <span class="font-bold text-slate-800">Notifikasi Push / Info Promo & Akun</span>. <span class="text-red-500 font-bold">(Wajib)</span>
+        Saya menyetujui untuk menerima <span class="font-bold text-slate-800">Info lebih lanjut</span>. <span class="text-red-500 font-bold">(Wajib)</span>
       </label>
     </div>
     <!-- ⬆️ AKHIR TAMBAHAN CHECKBOX ⬆️ -->
@@ -2208,11 +2216,20 @@ window.loadPhotoLikes = async function() {
     alert(`${payload.notification.title}\n${payload.notification.body}`);
   });
     
-  // 5. FITUR LOGIN GOOGLE
+// 5. FITUR LOGIN GOOGLE (WAJIB CENTANG NOTIFIKASI)
   document.getElementById("btn-google-login")?.addEventListener("click", async () => {
-    const btn = document.getElementById("btn-google-login");
-    const errorEl = document.getElementById("login-error");
+    const chkConsent = document.getElementById("chk-notif-consent");
+    const errorEl = document.getElementById("login-error") || document.getElementById("reg-error");
     if (errorEl) errorEl.textContent = "";
+
+    // VALIDASI CENTANG NOTIFIKASI
+    if (!chkConsent || !chkConsent.checked) {
+      if (errorEl) errorEl.textContent = "Anda wajib mencentang persetujuan izin notifikasi sebelum masuk dengan Google.";
+      alert("Anda wajib mencentang persetujuan izin notifikasi untuk melanjutkan.");
+      return;
+    }
+
+    const btn = document.getElementById("btn-google-login");
 
     try {
       if (btn) {
@@ -2220,18 +2237,22 @@ window.loadPhotoLikes = async function() {
         btn.style.opacity = "0.7";
       }
 
+      await setupPushNotification();
+
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
       const authOverlay = document.getElementById("auth-overlay");
       if (authOverlay) authOverlay.style.display = "none";
 
-      set(ref(db, "users/" + user.uid), {
+      await set(ref(db, "users/" + user.uid), {
         username: user.displayName || "Google User",
         email: user.email,
         emailVerified: user.emailVerified,
         lastLogin: new Date().toISOString()
       }).catch(dbErr => console.warn("Peringatan Database:", dbErr));
+
+      await setupPushNotification(user.uid);
 
     } catch (error) {
       console.error("Error Login Google:", error);
@@ -2246,21 +2267,12 @@ window.loadPhotoLikes = async function() {
     }
   });
 
-  // 6. KONFIGURASI EMAILJS & REGISTER OTP
-  const EMAILJS_SERVICE_ID = "service_eqwhihi";
-  const EMAILJS_PUBLIC_KEY = "sFzLru6fytB-WGPjN";
-  const EMAILJS_TEMPLATE_ID = "template_gy966lh";
-
-  let pendingRegistrationData = null;
-
-  if (window.emailjs) {
-    emailjs.init(EMAILJS_PUBLIC_KEY);
-  }
-
+  // 6. REGISTER OTP EMAIL (WAJIB CENTANG NOTIFIKASI)
   document.getElementById("btn-register")?.addEventListener("click", async () => {
     const username = document.getElementById("reg-username").value.trim();
     const email = document.getElementById("reg-email").value.trim();
     const password = document.getElementById("reg-password").value;
+    const chkConsent = document.getElementById("chk-notif-consent");
     const errorEl = document.getElementById("reg-error");
     const btnRegister = document.getElementById("btn-register");
     errorEl.textContent = "";
@@ -2270,10 +2282,18 @@ window.loadPhotoLikes = async function() {
       return;
     }
 
+    // VALIDASI CENTANG NOTIFIKASI
+    if (!chkConsent || !chkConsent.checked) {
+      errorEl.textContent = "Anda wajib mencentang persetujuan izin notifikasi untuk mendaftar.";
+      return;
+    }
+
     btnRegister.disabled = true;
     btnRegister.innerText = "Mengirim Kode OTP ke Email...";
 
     try {
+      await setupPushNotification();
+
       const generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
       const cleanEmail = email.replace(/[^a-zA-Z0-9]/g, "_");
 
@@ -2306,55 +2326,7 @@ window.loadPhotoLikes = async function() {
     }
   });
 
-  // 7. VERIFIKASI KODE OTP
-  document.getElementById("btn-verify-otp")?.addEventListener("click", async () => {
-    const inputOTP = document.getElementById("otp-input").value.trim();
-    const errorEl = document.getElementById("otp-error");
-    errorEl.textContent = "";
-
-    if (!inputOTP || inputOTP.length !== 6) {
-      errorEl.textContent = "Masukkan 6 digit kode OTP yang benar.";
-      return;
-    }
-
-    if (!pendingRegistrationData) {
-      errorEl.textContent = "Sesi verifikasi kadaluarsa. Silakan daftar ulang.";
-      return;
-    }
-
-    try {
-      const snapshot = await get(ref(db, "pending_otps/" + pendingRegistrationData.cleanEmail));
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        
-        if (data.otp === inputOTP) {
-          const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-          await sendEmailVerification(userCredential.user);
-
-          await set(ref(db, "users/" + userCredential.user.uid), { 
-            username: data.username, 
-            email: data.email, 
-            emailVerified: true,
-            createdAt: new Date().toISOString() 
-          });
-
-          await set(ref(db, "pending_otps/" + pendingRegistrationData.cleanEmail), null);
-
-          alert("Verifikasi Berhasil! Akun Anda telah terdaftar.");
-          pendingRegistrationData = null;
-          bukaTabLogin();
-        } else {
-          errorEl.textContent = "Kode OTP salah. Silakan periksa kembali email Anda.";
-        }
-      } else {
-        errorEl.textContent = "Sesi OTP tidak ditemukan atau sudah kadaluarsa.";
-      }
-    } catch (e) {
-      errorEl.textContent = terjemahErrorFirebase(e.code);
-    }
-  });
-
-  // 8. LOGIN MANUAL EMAIL & PASSWORD (DENGAN VALIDASI CENTANG NOTIFIKASI)
+  // 8. LOGIN MANUAL EMAIL & PASSWORD (WAJIB CENTANG NOTIFIKASI)
   document.getElementById("btn-login")?.addEventListener("click", async () => {
     const email = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-password").value;
@@ -2362,23 +2334,19 @@ window.loadPhotoLikes = async function() {
     const errorEl = document.getElementById("login-error");
     errorEl.textContent = "";
 
-    // Validasi input
     if (!email || !password) {
       errorEl.textContent = "Silakan isi email dan password Anda.";
       return;
     }
 
-    // Validasi Wajib Centang Notifikasi FCM
+    // VALIDASI CENTANG NOTIFIKASI
     if (!chkConsent || !chkConsent.checked) {
       errorEl.textContent = "Anda wajib mencentang persetujuan izin notifikasi untuk melanjutkan masuk.";
       return;
     }
 
     try {
-      // Minta izin notifikasi browser secara langsung akibat gesture klik user
       await setupPushNotification();
-
-      // Lanjutkan Login Firebase
       await signInWithEmailAndPassword(auth, email, password);
     } catch (e) {
       errorEl.textContent = terjemahErrorFirebase(e.code);
