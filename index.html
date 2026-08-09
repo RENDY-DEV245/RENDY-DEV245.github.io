@@ -2172,10 +2172,14 @@ window.loadPhotoLikes = async function() {
   // Tampilkan notifikasi saat website SEDANG DIBUKA (foreground)
   onMessage(messaging, (payload) => {
     console.log("Pesan FCM diterima (foreground):", payload);
-    const title = payload.notification?.title || "Notifikasi Baru";
+    const title = payload.notification?.title || "Notifikasi AFC Lifescience";
     const body = payload.notification?.body || "";
+    
     if (Notification.permission === "granted") {
-      new Notification(title, { body });
+      new Notification(title, {
+        body: body,
+        icon: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg'
+      });
     }
   });
 
