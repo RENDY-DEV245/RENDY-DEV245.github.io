@@ -2111,11 +2111,7 @@ async function prosesLoginGoogle() {
   });
 
   // LOGIN MANUAL
-  document.getElementById("btn-login")?.addEventListener("click", async () => {
-    const email = document.getElementById("login-email").value.trim();
-    const password = document.getElementById("login-password").value;
-    const errorEl = document.getElementById("login-error");
-    errorEl.textContent = "";
+ 
 
     document.getElementById("btn-login").addEventListener("click", async () => {
     const email = document.getElementById("login-email").value.trim();
