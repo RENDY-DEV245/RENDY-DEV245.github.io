@@ -2118,11 +2118,16 @@ async function prosesLoginGoogle() {
     errorEl.textContent = "";
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-    } catch (e) {
-      errorEl.textContent = terjemahErrorFirebase(e.code);
+    const result = await signInWithEmailAndPassword(auth, email, password);
+
+    console.log("LOGIN SUKSES!");
+    console.log("USER:", result.user);
+    console.log("UID:", result.user.uid);
+
+} catch (e) {
+    console.error("LOGIN GAGAL:", e);
+    errorEl.textContent = terjemahErrorFirebase(e.code);
     }
-  });
 
   // STATUS LOGIN (STATE LISTENER)
 onAuthStateChanged(auth, async (user) => {
