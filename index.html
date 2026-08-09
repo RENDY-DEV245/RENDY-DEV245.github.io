@@ -2095,6 +2095,19 @@ window.loadPhotoLikes = async function() {
     sendEmailVerification,
     GoogleAuthProvider,
     signInWithPopup
+      import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    onAuthStateChanged, 
+    signOut,
+    sendPasswordResetEmail,
+    sendEmailVerification,
+    GoogleAuthProvider,
+    signInWithPopup,
+    setPersistence,
+    browserLocalPersistence
+  
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
   import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
 
@@ -2112,6 +2125,7 @@ window.loadPhotoLikes = async function() {
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
   const auth = getAuth(app);
+  setPersistence(auth, browserLocalPersistence).catch((err) => console.error("Gagal set persistence:", err));  
   const db = getDatabase(app);
   const googleProvider = new GoogleAuthProvider();
 
