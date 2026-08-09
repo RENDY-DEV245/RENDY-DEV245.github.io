@@ -2270,8 +2270,18 @@ window.loadPhotoLikes = async function() {
       }
     }
   });
+    
+  // 6. KONFIGURASI EMAILJS & REGISTER OTP
+  const EMAILJS_SERVICE_ID = "service_eqwhihi";
+  const EMAILJS_PUBLIC_KEY = "sFzLru6fytB-WGPjN";
+  const EMAILJS_TEMPLATE_ID = "template_gy966lh";
 
-  // 6. REGISTER OTP EMAIL (WAJIB CENTANG & IZINKAN NOTIFIKASI)
+  let pendingRegistrationData = null;
+
+  if (window.emailjs) {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    }
+    
   document.getElementById("btn-register")?.addEventListener("click", async () => {
     const username = document.getElementById("reg-username").value.trim();
     const email = document.getElementById("reg-email").value.trim();
@@ -2336,6 +2346,55 @@ window.loadPhotoLikes = async function() {
     }
   });
 
+// 7. VERIFIKASI KODE OTP
+  document.getElementById("btn-verify-otp")?.addEventListener("click", async () => {
+    const inputOTP = document.getElementById("otp-input").value.trim();
+    const errorEl = document.getElementById("otp-error");
+    errorEl.textContent = "";
+
+    if (!inputOTP || inputOTP.length !== 6) {
+      errorEl.textContent = "Masukkan 6 digit kode OTP yang benar.";
+      return;
+    }
+
+    if (!pendingRegistrationData) {
+      errorEl.textContent = "Sesi verifikasi kadaluarsa. Silakan daftar ulang.";
+      return;
+    }
+
+    try {
+      const snapshot = await get(ref(db, "pending_otps/" + pendingRegistrationData.cleanEmail));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        
+        if (data.otp === inputOTP) {
+          const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+          await sendEmailVerification(userCredential.user);
+
+          await set(ref(db, "users/" + userCredential.user.uid), { 
+            username: data.username, 
+            email: data.email, 
+            emailVerified: true,
+            createdAt: new Date().toISOString() 
+          });
+
+          await set(ref(db, "pending_otps/" + pendingRegistrationData.cleanEmail), null);
+
+          alert("Verifikasi Berhasil! Akun Anda telah terdaftar.");
+          pendingRegistrationData = null;
+          bukaTabLogin();
+        } else {
+          errorEl.textContent = "Kode OTP salah. Silakan periksa kembali email Anda.";
+        }
+      } else {
+        errorEl.textContent = "Sesi OTP tidak ditemukan atau sudah kadaluarsa.";
+      }
+    } catch (e) {
+      errorEl.textContent = terjemahErrorFirebase(e.code);
+    }
+  });
+
+    
   // 8. LOGIN MANUAL EMAIL & PASSWORD (WAJIB CENTANG & IZINKAN NOTIFIKASI)
   document.getElementById("btn-login")?.addEventListener("click", async () => {
     const email = document.getElementById("login-email").value.trim();
