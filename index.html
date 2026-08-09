@@ -1436,18 +1436,16 @@ const PRODUCT_DATABASE = {
 
                 this.camera.position.z = 10;
 
-                // --- Shape Kelopak/Daun Sakura Normal (Single Petal) ---
+                // --- Shape Kelopak/Daun Sakura Normal ---
 const leafShape = new THREE.Shape();
 leafShape.moveTo(0, 0);
 leafShape.quadraticCurveTo(0.6, 1.2, 0.4, 2.2);
-// Cerukan khas kelopak sakura di bagian atas
 leafShape.quadraticCurveTo(0.1, 2.4, 0, 2.25);
 leafShape.quadraticCurveTo(-0.1, 2.4, -0.4, 2.2);
 leafShape.quadraticCurveTo(-0.6, 1.2, 0, 0);
 
-// Extrude halus agar berbentuk 3D padat
 const extrudeSettings = { 
-    depth: 0.04, 
+    depth: 0.05, 
     bevelEnabled: true, 
     bevelSegments: 3, 
     steps: 1, 
@@ -1458,27 +1456,25 @@ const extrudeSettings = {
 const leafGeo = new THREE.ExtrudeGeometry(leafShape, extrudeSettings);
 leafGeo.center();
 
-// Material Sakura Normal (Tanpa wireframe, padat, dan halus)
-const leafMat = new THREE.MeshStandardMaterial({ 
-    color: 0xFFB7C5,        // Warna Soft Sakura Pink
-    roughness: 0.4,
-    metalness: 0.1,
-    side: THREE.DoubleSide, // Terlihat dari depan & belakang
+// 1. SOLUSI WARNA: Gunakan MeshBasicMaterial agar warna PINK selalu menyala 
+// tanpa tergantung ada/tidaknya lampu di scene
+const leafMat = new THREE.MeshBasicMaterial({ 
+    color: 0xFF8DA1,        // Warna Sakura Pink Cerah
+    side: THREE.DoubleSide,
     transparent: true, 
-    opacity: 0.95 
+    opacity: 0.9 
 });
 
-// Buat objek Mesh tunggal
 this.mesh3D = new THREE.Mesh(leafGeo, leafMat);
 
-// Skala disesuaikan
-this.mesh3D.scale.set(0.8, 0.8, 0.8);
+// 2. SOLUSI UKURAN: Dibuat lebih besar (Nilai dinaikkan dari 0.8 ke 1.8)
+this.mesh3D.scale.set(1.8, 1.8, 1.8);
 
-// PERUBAHAN POSISI:
-// X = 2.5 (agak kanan), Y = -1.2 (diturunkan ke bawah teks hero)
-this.mesh3D.position.set(2.5, -1.2, 0); 
+// 3. SOLUSI POSISI: Diturunkan lebih bawah lagi
+// Ubah angka Y (-2.2) jika ingin lebih turun/naik lagi
+this.mesh3D.position.set(2.5, -2.2, 0); 
 
-// (Opsional) Miringkan sedikit posisi daun agar terlihat lebih alami
+// Kemiringan objek
 this.mesh3D.rotation.z = Math.PI / 6;
 this.mesh3D.rotation.x = Math.PI / 8;
 
