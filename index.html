@@ -1415,8 +1415,7 @@ const PRODUCT_DATABASE = {
             }
         }
 
-      
-                class Three3DWorld {
+        class Three3DWorld {
             constructor(containerId) {
                 this.container = document.getElementById(containerId);
                 if (!this.container) return;
@@ -1437,120 +1436,53 @@ const PRODUCT_DATABASE = {
 
                 this.camera.position.z = 10;
 
-                // 1. DAUN SAKURA 3D TUNGGAL (NORMAL)
-                const leafShape = new THREE.Shape();
-                leafShape.moveTo(0, 0);
-                leafShape.quadraticCurveTo(0.4, 0.8, 0.6, 1.8);
-                leafShape.quadraticCurveTo(0.3, 2.8, 0, 3.4);
-                leafShape.quadraticCurveTo(-0.3, 2.8, -0.6, 1.8);
-                leafShape.quadraticCurveTo(-0.4, 0.8, 0, 0);
+                // --- Shape Kelopak/Daun Sakura Normal (Single Petal) ---
+const leafShape = new THREE.Shape();
+leafShape.moveTo(0, 0);
+leafShape.quadraticCurveTo(0.6, 1.2, 0.4, 2.2);
+// Cerukan khas kelopak sakura di bagian atas
+leafShape.quadraticCurveTo(0.1, 2.4, 0, 2.25);
+leafShape.quadraticCurveTo(-0.1, 2.4, -0.4, 2.2);
+leafShape.quadraticCurveTo(-0.6, 1.2, 0, 0);
 
-                const extrudeSettings = { 
-                    depth: 0.1, 
-                    bevelEnabled: true, 
-                    bevelSegments: 3, 
-                    steps: 1, 
-                    bevelSize: 0.04, 
-                    bevelThickness: 0.04 
-                };
-                
-                const leafGeo = new THREE.ExtrudeGeometry(leafShape, extrudeSettings);
-                leafGeo.center();
+// Extrude halus agar berbentuk 3D padat
+const extrudeSettings = { 
+    depth: 0.04, 
+    bevelEnabled: true, 
+    bevelSegments: 3, 
+    steps: 1, 
+    bevelSize: 0.03, 
+    bevelThickness: 0.02 
+};
 
-                const leafMat = new THREE.MeshBasicMaterial({ 
-                    color: 0xFF8DA1, 
-                    wireframe: true, 
-                    transparent: true, 
-                    opacity: 0.55 
-                });
+const leafGeo = new THREE.ExtrudeGeometry(leafShape, extrudeSettings);
+leafGeo.center();
 
-                this.mesh3D = new THREE.Mesh(leafGeo, leafMat);
+// Material Sakura Normal (Tanpa wireframe, padat, dan halus)
+const leafMat = new THREE.MeshStandardMaterial({ 
+    color: 0xFFB7C5,        // Warna Soft Sakura Pink
+    roughness: 0.4,
+    metalness: 0.1,
+    side: THREE.DoubleSide, // Terlihat dari depan & belakang
+    transparent: true, 
+    opacity: 0.95 
+});
 
-                // Posisi Agak Ke Bawah agar tidak menutupi Teks
-                this.mesh3D.position.set(3.2, -2.2, 0);
-                this.mesh3D.scale.set(0.85, 0.85, 0.85);
-                this.mesh3D.rotation.z = -Math.PI / 5;
-                
-                this.scene.add(this.mesh3D);
+// Buat objek Mesh tunggal
+this.mesh3D = new THREE.Mesh(leafGeo, leafMat);
 
-                // 2. PARTIKEL SAKURA MELAYANG
-                const sakuraShape = new THREE.Shape();
-                sakuraShape.moveTo(0, 0);
-                sakuraShape.bezierCurveTo(0, 0.2, -0.25, 0.4, -0.25, 0.6);
-                sakuraShape.bezierCurveTo(-0.25, 0.85, 0, 1.0, 0.25, 0.85);
-                sakuraShape.bezierCurveTo(0.25, 0.4, 0, 0.2, 0, 0);
+// Skala disesuaikan
+this.mesh3D.scale.set(0.8, 0.8, 0.8);
 
-                const geo = new THREE.ShapeGeometry(sakuraShape);
-                geo.scale(0.45, 0.45, 0.45);
+// PERUBAHAN POSISI:
+// X = 2.5 (agak kanan), Y = -1.2 (diturunkan ke bawah teks hero)
+this.mesh3D.position.set(2.5, -1.2, 0); 
 
-                const mat = new THREE.MeshBasicMaterial({ 
-                    color: 0xFFB7C5, 
-                    side: THREE.DoubleSide, 
-                    transparent: true, 
-                    opacity: 0.85 
-                });
+// (Opsional) Miringkan sedikit posisi daun agar terlihat lebih alami
+this.mesh3D.rotation.z = Math.PI / 6;
+this.mesh3D.rotation.x = Math.PI / 8;
 
-                for (let i = 0; i < 80; i++) {
-                    const particle = new THREE.Mesh(geo, mat);
-                    particle.position.set(
-                        (Math.random() - 0.5) * 24,
-                        (Math.random() - 0.5) * 20,
-                        (Math.random() - 0.5) * 10
-                    );
-                    particle.rotation.set(
-                        Math.random() * Math.PI,
-                        Math.random() * Math.PI,
-                        Math.random() * Math.PI
-                    );
-                    particle.userData = {
-                        speedY: 0.008 + Math.random() * 0.012,
-                        swaySpeed: 0.01 + Math.random() * 0.02,
-                        rotX: (Math.random() - 0.5) * 0.02,
-                        rotY: (Math.random() - 0.5) * 0.02,
-                        rotZ: (Math.random() - 0.5) * 0.02,
-                        swayOffset: Math.random() * Math.PI * 2
-                    };
-                    this.particles.push(particle);
-                    this.scene.add(particle);
-                }
-
-                window.addEventListener('resize', () => this.onResize());
-
-                this.animate();
-            }
-
-            onResize() {
-                this.camera.aspect = window.innerWidth / window.innerHeight;
-                this.camera.updateProjectionMatrix();
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-
-            animate() {
-                requestAnimationFrame(() => this.animate());
-
-                if (this.mesh3D) {
-                    this.mesh3D.rotation.x += 0.002;
-                    this.mesh3D.rotation.y += 0.003;
-                }
-
-                this.particles.forEach(p => {
-                    p.position.y -= p.userData.speedY;
-                    p.position.x += Math.sin(p.position.y * 0.8 + p.userData.swayOffset) * 0.006;
-                    p.position.z += Math.cos(p.position.y * 0.8 + p.userData.swayOffset) * 0.003;
-
-                    p.rotation.x += p.userData.rotX;
-                    p.rotation.y += p.userData.rotY;
-                    p.rotation.z += p.userData.rotZ;
-
-                    if (p.position.y < -10) {
-                        p.position.y = 10;
-                        p.position.x = (Math.random() - 0.5) * 24;
-                    }
-                });
-
-                this.renderer.render(this.scene, this.camera);
-            }
-        }
+this.scene.add(this.mesh3D);
 
 // Sakura Petal Particle System (Ukuran Diperbesar)
 const sakuraShape = new THREE.Shape();
