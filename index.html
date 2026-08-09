@@ -1415,6 +1415,66 @@ const PRODUCT_DATABASE = {
             }
         }
 
+
+                 + Math.random() * 0.012,
+                        speedX: (Math.random() - 0.5) * 0.006,
+                        rotSpeedX: Math.random() * 0.03,
+                        rotSpeedY: Math.random() * 0.03,
+                        rotSpeedZ: Math.random() * 0.02,
+                        swayOffset: Math.random() * Math.PI * 2
+                    };
+
+                    this.particles.push(petal);
+                    this.scene.add(petal);
+                }
+
+                window.addEventListener('resize', () => this.onResize());
+
+                // Interaction dengan Scroll (Kamera TIDAK meluncur ke bawah lagi)
+                if (window.gsap && window.ScrollTrigger) {
+                    gsap.to(this.mesh3D.material.uniforms.uWind, {
+                        value: 2.2,
+                        scrollTrigger: {
+                            trigger: "#beranda",
+                            start: "top top",
+                            end: "bottom top",
+                            scrub: 1.5
+                        }
+                    });
+                }
+
+                this.animate();
+            }
+
+            onResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.updateCharacterScale();
+            }
+
+            updateCharacterScale() {
+                if (!this.mesh3D) return;
+                const w = window.innerWidth;
+                let scale = 1.65;
+                if (w < 480) scale = 1.1;
+                else if (w < 768) scale = 1.35;
+                else if (w < 1024) scale = 1.5;
+                this.mesh3D.scale.set(scale, scale, scale);
+            }
+
+            swapCharacter() {
+                if (!this.mesh3D || !window.gsap) return;
+                this.characterIndex = (this.characterIndex + 1) % this.characterImages.length;
+                const nextSrc = this.characterImages[this.characterIndex];
+                const uniforms = this.mesh3D.material.uniforms;
+
+                gsap.to(uniforms.uOpacity, {
+                    value: 0,
+                    duration: 0.4,
+                    onComplete: () => {
+                        this.textureLoader.load(nextSrc, (tex) => {
+                            tex.colorSpace = THREE.SRGBColorSpace;
 class Three3DWorld {
             constructor(containerId) {
                 this.container = document.getElementById(containerId);
@@ -1425,6 +1485,7 @@ class Three3DWorld {
                 this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
                 this.particles = [];
                 this.mesh3D = null;
+                this.baseY = -1.8; // Kunci posisi Y di batas bawah
 
                 this.init();
             }
@@ -1496,8 +1557,6 @@ class Three3DWorld {
                 });
                 
                 this.mesh3D = new THREE.Mesh(geometry, material);
-                // Posisi Y disesuaikan (-0.8) agar bagian bawah badan pas menyentuh perbatasan
-                this.mesh3D.position.set(2.2, -0.8, 0);
                 this.scene.add(this.mesh3D);
 
                 this.updateCharacterScale();
@@ -1550,7 +1609,7 @@ class Three3DWorld {
 
                 window.addEventListener('resize', () => this.onResize());
 
-                // Interaction dengan Scroll (Kamera TIDAK meluncur ke bawah lagi)
+                // Interaction dengan Scroll (Kamera diam, angin bertiup halus)
                 if (window.gsap && window.ScrollTrigger) {
                     gsap.to(this.mesh3D.material.uniforms.uWind, {
                         value: 2.2,
@@ -1576,11 +1635,27 @@ class Three3DWorld {
             updateCharacterScale() {
                 if (!this.mesh3D) return;
                 const w = window.innerWidth;
-                let scale = 1.65;
-                if (w < 480) scale = 1.1;
-                else if (w < 768) scale = 1.35;
-                else if (w < 1024) scale = 1.5;
-                this.mesh3D.scale.set(scale, scale, scale);
+                
+                // Posisi & Ukuran Presisi: Karakter Mendorong ke Bawah Dekat Badge 100% Import Japan
+                if (w < 480) { // Layar HP
+                    this.mesh3D.scale.set(1.1, 1.1, 1.1);
+                    this.baseY = -2.2;
+                    this.mesh3D.position.x = 0;
+                } else if (w < 768) { // Tablet / HP Landscape
+                    this.mesh3D.scale.set(1.3, 1.3, 1.3);
+                    this.baseY = -2.0;
+                    this.mesh3D.position.x = 1.0;
+                } else if (w < 1024) { // Laptop Kecil
+                    this.mesh3D.scale.set(1.5, 1.5, 1.5);
+                    this.baseY = -1.9;
+                    this.mesh3D.position.x = 1.8;
+                } else { // Desktop / Laptop
+                    this.mesh3D.scale.set(1.65, 1.65, 1.65);
+                    this.baseY = -1.8;
+                    this.mesh3D.position.x = 2.2; // Tepat di samping kanan dekat badge 100% Import Japan
+                }
+                
+                this.mesh3D.position.y = this.baseY;
             }
 
             swapCharacter() {
@@ -1607,11 +1682,13 @@ class Three3DWorld {
 
                 const time = this.clock.getElapsedTime();
 
-                // Animasi goyang halus karakter
+                // Animasi goyang halus (posisi bawah terkunci aman di balik perbatasan)
                 if (this.mesh3D) {
-                    this.mesh3D.rotation.y = Math.sin(time * 0.8) * 0.25;
-                    this.mesh3D.rotation.x = Math.sin(time * 0.6) * 0.05;
-                    this.mesh3D.position.y = -0.8 + Math.sin(time * 1.2) * 0.1;
+                    this.mesh3D.rotation.y = Math.sin(time * 0.8) * 0.2;
+                    this.mesh3D.rotation.x = Math.sin(time * 0.6) * 0.04;
+                    
+                    const baseY = this.baseY !== undefined ? this.baseY : -1.8;
+                    this.mesh3D.position.y = baseY + Math.sin(time * 1.2) * 0.04; // Goyangan vertikal sangat tipis
                     this.mesh3D.material.uniforms.uTime.value = time;
                 }
 
@@ -1631,11 +1708,7 @@ class Three3DWorld {
 
                 this.renderer.render(this.scene, this.camera);
             }
-        }
-        
-                        
-           
-
+                    }
 
         class App {
             constructor() {
