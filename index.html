@@ -1356,9 +1356,10 @@ const PRODUCT_DATABASE = {
 
     subscribe(listener) {
         this.listeners.push(listener);
+      }
     }
-
-    
+  }      
+        
         class ModalController {
             constructor(cartStore) {
                 this.cartStore = cartStore;
@@ -2256,17 +2257,19 @@ if (window.app && window.app.processCheckout) {
     measurementId: "G-MZJ6DDCJCS"
   };
 
-  // 3. INISIALISASI UTAMA (HANYA DIPANGGIL 1 KALI)
+  // 3. INISIALISASI UTAMA
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
   const auth = getAuth(app);
   setPersistence(auth, browserLocalPersistence).catch((err) => console.error("Gagal set persistence:", err));  
-  const db = getDatabase(app);
+  
+  const db = getDatabase(app); // <-- 'db' dibuat di sini
   const messaging = getMessaging(app);
 
-window.firebaseDB = db;
-window.refFn = ref;
-window.setFn = set;
+  // Hubungkan ke window SETELAH 'db' diinisialisasi di atas
+  window.firebaseDB = db;
+  window.refFn = ref;
+  window.setFn = set;
     
   // Tampilkan notifikasi saat website SEDANG DIBUKA (foreground)
   onMessage(messaging, (payload) => {
