@@ -2170,61 +2170,47 @@ window.loadPhotoLikes = async function() {
   const googleProvider = new GoogleAuthProvider();
   googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-  
-    // 4. FUNGSI MINTA IZIN NOTIFIKASI (SMART PERMISSION CHECK)
+// 4. FUNGSI MINTA IZIN NOTIFIKASI (FIX: TIDAK AKAN FITNAH MENOLAK)
   async function setupPushNotification(userId = null) {
-    try {
-      if (!("Notification" in window)) {
-        alert("Browser Anda tidak mendukung fitur Notifikasi Push.");
-        return false;
-      }
-
-      // KONDISI A: Pengguna SUDAH Mengizinkan sebelumnya -> Langsung Lanjut
-      if (Notification.permission === 'granted') {
-        const token = await getToken(messaging, { 
-          vapidKey: "BPaGr4BDKVjmQhNRHP3RfHhglvLLYY8zVbNF0_u5-84GiRH-hiwnFdBZgVL-WFbcJ7RpDNTwjyCy9W8N_HL8UXI" 
-        });
-
-        if (token && userId) {
-          await set(ref(db, "fcm_tokens/" + userId), {
-            token: token,
-            updatedAt: new Date().toISOString()
-          });
-        }
-        return true;
-      }
-
-      // KONDISI B: Pengguna Pernah MEMBLOKIR di setelan browser -> Beri petunjuk buka blokir
-      if (Notification.permission === 'denied') {
-        alert("Akses Notifikasi saat ini DIBLOKIR di setelan browser Anda.\n\nUntuk bisa masuk/daftar:\n1. Klik ikon GEMBOK 🔒 di sebelah kiri URL alamat web ini.\n2. Ubah Notifikasi menjadi 'IZINKAN'.\n3. Coba login kembali.");
-        return false;
-      }
-
-      // KONDISI C: Belum pernah diminta -> MUNCULKAN POPUP NATIVE "IZINKAN & BLOKIR" BROWSER
-      const permission = await Notification.requestPermission();
-      
-      if (permission === 'granted') {
-        const token = await getToken(messaging, { 
-          vapidKey: "BPaGr4BDKVjmQhNRHP3RfHhglvLLYY8zVbNF0_u5-84GiRH-hiwnFdBZgVL-WFbcJ7RpDNTwjyCy9W8N_HL8UXI" 
-        });
-
-        if (token && userId) {
-          await set(ref(db, "fcm_tokens/" + userId), {
-            token: token,
-            updatedAt: new Date().toISOString()
-          });
-        }
-        return true;
-      } else {
-        // Pengguna baru saja menekan tombol "Blokir" pada popup browser
-        alert("Login/Daftar dibatalkan karena Anda menekan tombol BLOKIR pada notifikasi browser.");
-        return false;
-      }
-
-    } catch (err) {
-      console.error("Gagal mengambil FCM Token:", err);
+    if (!("Notification" in window)) {
+      alert("Browser Anda tidak mendukung fitur Notifikasi Push.");
       return false;
     }
+
+    // 1. Minta Izin Notification Native Browser
+    let permission = Notification.permission;
+    if (permission === 'default') {
+      permission = await Notification.requestPermission();
+    }
+
+    // 2. Jika Pengguna Memang Benar-Benar MEMBLOKIR / MENOLAK
+    if (permission !== 'granted') {
+      if (permission === 'denied') {
+        alert("Akses Notifikasi DIBLOKIR di setelan browser Anda.\n\nUntuk mengizinkan:\n1. Klik ikon GEMBOK 🔒 di sebelah kiri URL alamat web.\n2. Ubah Notifikasi menjadi 'IZINKAN'.\n3. Coba login lagi.");
+      }
+      return false; // Pengguna memang menolak/memblokir
+    }
+
+    // 3. JIKA PENGGUNA PILIH "IZINKAN" -> LANGSUNG RETURN TRUE (LOGIN LULUS 100%)!
+    // Pengambilan FCM Token dilakukan di background agar tidak menggagalkan login jika ada error SW/Network
+    (async () => {
+      try {
+        const token = await getToken(messaging, { 
+          vapidKey: "BPaGr4BDKVjmQhNRHP3RfHhglvLLYY8zVbNF0_u5-84GiRH-hiwnFdBZgVL-WFbcJ7RpDNTwjyCy9W8N_HL8UXI" 
+        });
+
+        if (token && userId) {
+          await set(ref(db, "fcm_tokens/" + userId), {
+            token: token,
+            updatedAt: new Date().toISOString()
+          });
+        }
+      } catch (tokenErr) {
+        console.warn("Info: User sudah Izinkan, tapi FCM Token gagal diambil di background:", tokenErr);
+      }
+    })();
+
+    return true; // USER SUDAH TEKAN IZINKAN! AKSEPTASI LOGIN DITERIMA!
     }
     
   // 5. FITUR LOGIN GOOGLE (WAJIB CENTANG & IZINKAN NOTIFIKASI)
