@@ -1436,17 +1436,59 @@ const PRODUCT_DATABASE = {
 
                 this.camera.position.z = 10;
 
-                // 3D "Hello World" Mesh Object (Golden Interactive Torus Knot)
-                const geometry = new THREE.TorusKnotGeometry(1.8, 0.4, 120, 16);
-                const material = new THREE.MeshBasicMaterial({ 
-                    color: 0xD4AF37, 
-                    wireframe: true, 
-                    transparent: true, 
-                    opacity: 0.35 
-                });
-                this.mesh3D = new THREE.Mesh(geometry, material);
-                this.mesh3D.position.set(3, 0, 0);
-                this.scene.add(this.mesh3D);
+// Objek 3D Daun Sakura 3 Jari
+const leafShape = new THREE.Shape();
+leafShape.moveTo(0, 0);
+leafShape.quadraticCurveTo(0.35, 0.8, 0.55, 1.8);
+leafShape.quadraticCurveTo(0.25, 2.8, 0, 3.6); // Ujung lancip daun
+leafShape.quadraticCurveTo(-0.25, 2.8, -0.55, 1.8);
+leafShape.quadraticCurveTo(-0.35, 0.8, 0, 0);
+
+// Extrude agar daun berbentuk 3D nyata
+const extrudeSettings = { depth: 0.08, bevelEnabled: true, bevelSegments: 2, steps: 1, bevelSize: 0.04, bevelThickness: 0.04 };
+const leafGeo = new THREE.ExtrudeGeometry(leafShape, extrudeSettings);
+leafGeo.center();
+
+// Material Sakura Pink Elegance
+const leafMat = new THREE.MeshBasicMaterial({ 
+    color: 0xFF8DA1, 
+    wireframe: true, 
+    transparent: true, 
+    opacity: 0.55 
+});
+
+// Group 3 Jari Daun + Tangkai
+this.mesh3D = new THREE.Group();
+
+// 1. Jari Tengah (Daun Utama)
+const centerLeaf = new THREE.Mesh(leafGeo, leafMat);
+centerLeaf.position.set(0, 0.8, 0);
+centerLeaf.scale.set(0.85, 0.85, 0.85);
+this.mesh3D.add(centerLeaf);
+
+// 2. Jari Kiri
+const leftLeaf = new THREE.Mesh(leafGeo, leafMat);
+leftLeaf.position.set(-0.95, 0.15, 0);
+leftLeaf.rotation.z = Math.PI / 4.2; // Miring ke kiri
+leftLeaf.scale.set(0.7, 0.7, 0.7);
+this.mesh3D.add(leftLeaf);
+
+// 3. Jari Kanan
+const rightLeaf = new THREE.Mesh(leafGeo, leafMat);
+rightLeaf.position.set(0.95, 0.15, 0);
+rightLeaf.rotation.z = -Math.PI / 4.2; // Miring ke kanan
+rightLeaf.scale.set(0.7, 0.7, 0.7);
+this.mesh3D.add(rightLeaf);
+
+// Tangkai Daun (Stem)
+const stemGeo = new THREE.CylinderGeometry(0.03, 0.05, 1.6, 8);
+const stemMesh = new THREE.Mesh(stemGeo, leafMat);
+stemMesh.position.set(0, -0.85, 0);
+this.mesh3D.add(stemMesh);
+
+// Posisi di Layar Hero (Sesuai posisi awal)
+this.mesh3D.position.set(3, 0, 0);
+this.scene.add(this.mesh3D);
 
 // Sakura Petal Particle System (Ukuran Diperbesar)
 const sakuraShape = new THREE.Shape();
