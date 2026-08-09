@@ -791,11 +791,19 @@ window.addEventListener('error', function(e) {
                 <p class="mt-1">WhatsApp: +62 811-5994-455</p>
                 <p class="mt-1">Email: info@afc-lifescience.co.id</p>
             </div>
-            <div>
-                <h4 class="font-bold text-white mb-3 uppercase">Jam Operasional</h4>
-                <p>Senin - Sabtu: 09:00 - 18:00 WIB</p>
-                <p class="mt-2 text-[10px] text-slate-500">© 2026 AFC Lifescience Indonesia. All rights reserved.</p>
-            </div>
+<div>
+    <h4 class="font-bold text-white mb-3 uppercase">Jam Operasional</h4>
+    <p>Senin - Sabtu: 09:00 - 18:00 WIB</p>
+    
+    <!-- TOMBOL LOG OUT -->
+    <div class="mt-4 pt-3 border-t border-slate-800">
+        <button id="btn-logout" type="button" class="inline-flex items-center gap-2 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/40 px-3.5 py-1.5 rounded-lg text-xs font-bold transition duration-200 shadow-sm active:scale-95">
+            <i class="fa-solid fa-right-from-bracket"></i> Keluar / Log Out
+        </button>
+    </div>
+
+    <p class="mt-3 text-[10px] text-slate-500">© 2026 AFC Lifescience Indonesia. All rights reserved.</p>
+</div>
         </div>
     </footer>
 
@@ -1952,50 +1960,80 @@ window.loadPhotoLikes = async function() {
       <p class="text-xs text-slate-500 mt-1">Silakan masuk atau buat akun terlebih dahulu.</p>
     </div>
 
-    <div class="p-6">
-      
-      <!-- TOMBOL GOOGLE -->
-      <button type="button" id="btn-google-login" class="w-full py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-slate-700 font-medium text-sm flex items-center justify-center gap-3 transition-all shadow-sm mb-4 active:scale-95">
-        <svg class="w-5 h-5" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-        </svg>
-        Lanjutkan dengan Google
-      </button>
+<div class="p-6">
+  
+  <!-- TOMBOL GOOGLE -->
+  <button type="button" id="btn-google-login" class="w-full py-2.5 px-4 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl text-slate-700 font-medium text-sm flex items-center justify-center gap-3 transition-all shadow-sm mb-4 active:scale-95">
+    <svg class="w-5 h-5" viewBox="0 0 24 24">
+      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+    </svg>
+    Lanjutkan dengan Google
+  </button>
 
-      <div class="relative flex py-1 items-center mb-4">
-        <div class="flex-grow border-t border-slate-200"></div>
-        <span class="flex-shrink mx-3 text-[11px] font-semibold text-slate-400 uppercase">Atau Email Manual</span>
-        <div class="flex-grow border-t border-slate-200"></div>
-      </div>
-
-      <!-- TAB SWITCHER -->
-      <div class="flex bg-slate-100 p-1 rounded-xl mb-5">
-        <button id="tab-login-btn" type="button" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-slate-800">Login</button>
-        <button id="tab-reg-btn" type="button" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500">Daftar</button>
-      </div>
-
-      <!-- FORM LOGIN -->
-      <div id="login-box" style="display: block;" class="space-y-4">
-        <input type="email" id="login-email" placeholder="nama@email.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
-        <input type="password" id="login-password" placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
-        <p id="login-error" class="text-xs text-red-500 font-medium empty:hidden bg-red-50 p-2.5 rounded-lg border border-red-100"></p>
-        <button id="btn-login" type="button" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm">Masuk</button>
-      </div>
-
-      <!-- FORM REGISTER -->
-      <div id="register-box" style="display: none;" class="space-y-4">
-        <input type="text" id="reg-username" placeholder="Username" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
-        <input type="email" id="reg-email" placeholder="nama@email.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
-        <input type="password" id="reg-password" placeholder="Password" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
-        <p id="reg-error" class="text-xs text-red-500 font-medium empty:hidden bg-red-50 p-2.5 rounded-lg border border-red-100"></p>
-        <button id="btn-register" type="button" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm">Daftar Akun Baru</button>
-      </div>
-
-    </div>
+  <div class="relative flex py-1 items-center mb-4">
+    <div class="flex-grow border-t border-slate-200"></div>
+    <span class="flex-shrink mx-3 text-[11px] font-semibold text-slate-400 uppercase">Atau Email Manual</span>
+    <div class="flex-grow border-t border-slate-200"></div>
   </div>
+
+  <!-- TAB SWITCHER -->
+  <div id="auth-tab-bar" class="flex bg-slate-100 p-1 rounded-xl mb-5">
+    <button id="tab-login-btn" type="button" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-slate-800">Login</button>
+    <button id="tab-reg-btn" type="button" class="flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500">Daftar</button>
+  </div>
+
+  <!-- FORM LOGIN -->
+  <div id="login-box" style="display: block;" class="space-y-4">
+    <input type="email" id="login-email" placeholder="nama@email.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-red-500">
+    <input type="password" id="login-password" placeholder="••••••••" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-red-500">
+    
+    <div class="flex justify-between items-center text-xs">
+      <span class="text-slate-400">Lupa kata sandi Anda?</span>
+      <button type="button" onclick="bukaTabLupaPassword()" class="font-bold text-red-600 hover:underline">Lupa Password?</button>
+    </div>
+
+    <p id="login-error" class="text-xs text-red-500 font-medium empty:hidden bg-red-50 p-2.5 rounded-lg border border-red-100"></p>
+    <button id="btn-login" type="button" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm transition">Masuk</button>
+  </div>
+
+  <!-- FORM REGISTER -->
+  <div id="register-box" style="display: none;" class="space-y-4">
+    <input type="text" id="reg-username" placeholder="Username" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-red-500">
+    <input type="email" id="reg-email" placeholder="nama@email.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-red-500">
+    <input type="password" id="reg-password" placeholder="Password" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-red-500">
+    <p id="reg-error" class="text-xs text-red-500 font-medium empty:hidden bg-red-50 p-2.5 rounded-lg border border-red-100"></p>
+    <button id="btn-register" type="button" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm transition">Daftar & Kirim OTP Email</button>
+  </div>
+
+  <!-- FORM LUPA PASSWORD -->
+  <div id="forgot-box" style="display: none;" class="space-y-4">
+    <div class="text-left">
+      <p class="text-xs text-slate-600">Masukkan email terdaftar Anda untuk menerima link reset password.</p>
+    </div>
+    <input type="email" id="forgot-email" placeholder="nama@email.com" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-red-500">
+    <p id="forgot-msg" class="text-xs font-medium empty:hidden p-2.5 rounded-lg"></p>
+    <button id="btn-forgot" type="button" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl text-sm transition">Kirim Link Reset Password</button>
+    <button type="button" onclick="bukaTabLogin()" class="w-full py-2 text-xs font-bold text-slate-500 hover:text-slate-800">← Kembali ke Login</button>
+  </div>
+
+  <!-- FORM VERIFIKASI OTP EMAIL -->
+  <div id="otp-box" style="display: none;" class="space-y-4 text-center">
+    <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl">
+      <i class="fa-solid fa-envelope-circle-check text-2xl text-amber-600 mb-1"></i>
+      <p class="text-xs font-semibold text-slate-700">Kode OTP 6 Digit telah dikirim ke Email Anda.</p>
+      <p class="text-[10px] text-slate-500 mt-0.5">Silakan cek Kotak Masuk / Folder Spam email Anda.</p>
+    </div>
+    
+    <input type="text" id="otp-input" maxlength="6" placeholder="000000" class="w-full text-center tracking-[0.5em] text-xl font-bold px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:border-red-500">
+    
+    <p id="otp-error" class="text-xs text-red-500 font-medium empty:hidden bg-red-50 p-2.5 rounded-lg border border-red-100"></p>
+    <button id="btn-verify-otp" type="button" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl text-sm transition">Verifikasi & Lanjutkan</button>
+    <button type="button" onclick="bukaTabLogin()" class="w-full py-2 text-xs font-bold text-slate-500 hover:text-slate-800">Batal / Kembali ke Login</button>
+  </div>
+
 </div>
 
 <!-- SCRIPT LOGIC TAB -->
@@ -2003,6 +2041,9 @@ window.loadPhotoLikes = async function() {
   function bukaTabLogin() {
     document.getElementById('login-box').style.display = 'block';
     document.getElementById('register-box').style.display = 'none';
+    document.getElementById('forgot-box').style.display = 'none';
+    document.getElementById('otp-box').style.display = 'none';
+    document.getElementById('auth-tab-bar').style.display = 'flex';
     document.getElementById('tab-login-btn').className = 'flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-slate-800';
     document.getElementById('tab-reg-btn').className = 'flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500';
   }
@@ -2010,8 +2051,27 @@ window.loadPhotoLikes = async function() {
   function bukaTabDaftar() {
     document.getElementById('login-box').style.display = 'none';
     document.getElementById('register-box').style.display = 'block';
+    document.getElementById('forgot-box').style.display = 'none';
+    document.getElementById('otp-box').style.display = 'none';
+    document.getElementById('auth-tab-bar').style.display = 'flex';
     document.getElementById('tab-reg-btn').className = 'flex-1 py-2 text-sm font-semibold rounded-lg bg-white shadow-sm text-slate-800';
     document.getElementById('tab-login-btn').className = 'flex-1 py-2 text-sm font-semibold rounded-lg text-slate-500';
+  }
+
+  function bukaTabLupaPassword() {
+    document.getElementById('login-box').style.display = 'none';
+    document.getElementById('register-box').style.display = 'none';
+    document.getElementById('forgot-box').style.display = 'block';
+    document.getElementById('otp-box').style.display = 'none';
+    document.getElementById('auth-tab-bar').style.display = 'none';
+  }
+
+  function bukaTabOTP() {
+    document.getElementById('login-box').style.display = 'none';
+    document.getElementById('register-box').style.display = 'none';
+    document.getElementById('forgot-box').style.display = 'none';
+    document.getElementById('otp-box').style.display = 'block';
+    document.getElementById('auth-tab-bar').style.display = 'none';
   }
 
   document.getElementById('tab-login-btn')?.addEventListener('click', bukaTabLogin);
@@ -2028,14 +2088,13 @@ window.loadPhotoLikes = async function() {
     signInWithEmailAndPassword, 
     onAuthStateChanged, 
     signOut,
+    sendPasswordResetEmail,
+    sendEmailVerification,
     GoogleAuthProvider,
-    signInWithPopup,
-    signInWithRedirect,
-    getRedirectResult
+    signInWithPopup
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-  import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
 
-  // Konfigurasi Firebase Anda (Sudah Lengkap dengan measurementId)
   const firebaseConfig = {
     apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
     authDomain: "web-afc.firebaseapp.com",
@@ -2047,41 +2106,37 @@ window.loadPhotoLikes = async function() {
     measurementId: "G-MZJ6DDCJCS"
   };
 
-  // Inisialisasi Firebase & Analytics
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
   const auth = getAuth(app);
   const db = getDatabase(app);
   const googleProvider = new GoogleAuthProvider();
 
-// Tambahkan baris ini supaya selalu muncul pop-up pilih akun Google:
-googleProvider.setCustomParameters({
-  prompt: 'select_account'
-});
-  // FUNGSI LOGIN GOOGLE
-async function prosesLoginGoogle() {
-    try {
-        const result = await signInWithPopup(auth, googleProvider);
-        console.log("GOOGLE LOGIN BERHASIL:", result.user.email);
-    } catch (error) {
-        console.error("GOOGLE LOGIN GAGAL:", error);
-        alert("Login Google gagal: " + error.message);
-    }
-}
+  googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-  // Event Listener tombol Google Login
-  document.getElementById("btn-google-login")?.addEventListener("click", () => {
-    prosesLoginGoogle();
+  // KONFIGURASI EMAILJS MILIK ANDA
+  const EMAILJS_SERVICE_ID = "service_123456";
+  const EMAILJS_PUBLIC_KEY = "sFzLru6fytB-WGPjN";
+  const EMAILJS_TEMPLATE_ID = "template_gy966lh";
+
+  let pendingRegistrationData = null;
+
+  // 1. LOGIN GOOGLE
+  document.getElementById("btn-google-login")?.addEventListener("click", async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      alert("Login Google gagal: " + error.message);
+    }
   });
 
- 
-
-  // REGISTER MANUAL
+  // 2. REGISTER DENGAN OTP EMAILJS
   document.getElementById("btn-register")?.addEventListener("click", async () => {
     const username = document.getElementById("reg-username").value.trim();
     const email = document.getElementById("reg-email").value.trim();
     const password = document.getElementById("reg-password").value;
     const errorEl = document.getElementById("reg-error");
+    const btnRegister = document.getElementById("btn-register");
     errorEl.textContent = "";
 
     if (!username || !email || !password) {
@@ -2089,81 +2144,177 @@ async function prosesLoginGoogle() {
       return;
     }
 
+    btnRegister.disabled = true;
+    btnRegister.innerText = "Mengirim Kode OTP ke Email...";
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await set(ref(db, "users/" + userCredential.user.uid), { 
-        username, 
-        email, 
-        createdAt: new Date().toISOString() 
+      const generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+      const cleanEmail = email.replace(/[^a-zA-Z0-9]/g, "_");
+
+      await set(ref(db, "pending_otps/" + cleanEmail), {
+        username: username,
+        email: email,
+        password: password,
+        otp: generatedOTP,
+        createdAt: new Date().toISOString()
       });
-      alert("Registrasi berhasil! Silakan Login.");
-      bukaTabLogin();
+
+      pendingRegistrationData = { email, cleanEmail };
+
+      const emailData = {
+        service_id: EMAILJS_SERVICE_ID,
+        template_id: EMAILJS_TEMPLATE_ID,
+        user_id: EMAILJS_PUBLIC_KEY,
+        template_params: {
+          to_email: email,
+          to_name: username,
+          otp_code: generatedOTP
+        }
+      };
+
+      const res = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(emailData)
+      });
+
+      if (res.ok) {
+        bukaTabOTP();
+      } else {
+        errorEl.textContent = "Gagal mengirim email OTP. Periksa konfigurasi EmailJS Anda.";
+      }
+    } catch (e) {
+      errorEl.textContent = terjemahErrorFirebase(e.code || e.message);
+    } finally {
+      btnRegister.disabled = false;
+      btnRegister.innerText = "Daftar & Kirim OTP Email";
+    }
+  });
+
+  // 3. VERIFIKASI KODE OTP
+  document.getElementById("btn-verify-otp")?.addEventListener("click", async () => {
+    const inputOTP = document.getElementById("otp-input").value.trim();
+    const errorEl = document.getElementById("otp-error");
+    errorEl.textContent = "";
+
+    if (!inputOTP || inputOTP.length !== 6) {
+      errorEl.textContent = "Masukkan 6 digit kode OTP yang benar.";
+      return;
+    }
+
+    if (!pendingRegistrationData) {
+      errorEl.textContent = "Sesi verifikasi kadaluarsa. Silakan daftar ulang.";
+      return;
+    }
+
+    try {
+      const snapshot = await get(ref(db, "pending_otps/" + pendingRegistrationData.cleanEmail));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        
+        if (data.otp === inputOTP) {
+          const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+          await sendEmailVerification(userCredential.user);
+
+          await set(ref(db, "users/" + userCredential.user.uid), { 
+            username: data.username, 
+            email: data.email, 
+            emailVerified: true,
+            createdAt: new Date().toISOString() 
+          });
+
+          await set(ref(db, "pending_otps/" + pendingRegistrationData.cleanEmail), null);
+
+          alert("Verifikasi Berhasil! Akun Anda telah terdaftar.");
+          pendingRegistrationData = null;
+          bukaTabLogin();
+        } else {
+          errorEl.textContent = "Kode OTP salah. Silakan periksa kembali email Anda.";
+        }
+      } else {
+        errorEl.textContent = "Sesi OTP tidak ditemukan atau sudah kadaluarsa.";
+      }
     } catch (e) {
       errorEl.textContent = terjemahErrorFirebase(e.code);
     }
   });
 
-  // LOGIN MANUAL
- 
-
-    document.getElementById("btn-login").addEventListener("click", async () => {
+  // 4. LOGIN MANUAL
+  document.getElementById("btn-login")?.addEventListener("click", async () => {
     const email = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-password").value;
     const errorEl = document.getElementById("login-error");
-
     errorEl.textContent = "";
 
     try {
-        const result = await signInWithEmailAndPassword(auth, email, password);
-
-        console.log("LOGIN SUKSES!");
-        console.log("USER:", result.user);
-        console.log("UID:", result.user.uid);
-
+      await signInWithEmailAndPassword(auth, email, password);
     } catch (e) {
-        console.error("LOGIN GAGAL:", e);
-        errorEl.textContent = terjemahErrorFirebase(e.code);
+      errorEl.textContent = terjemahErrorFirebase(e.code);
     }
-});
+  });
 
-// STATUS LOGIN (STATE LISTENER)
-onAuthStateChanged(auth, (user) => {
-    console.log("=== CEK FIREBASE AUTH ===");
-    console.log("USER:", user);
-    console.log("UID:", user ? user.uid : "NULL");
-    console.log("EMAIL:", user ? user.email : "NULL");
+  // 5. LUPA / RESET PASSWORD
+  document.getElementById("btn-forgot")?.addEventListener("click", async () => {
+    const email = document.getElementById("forgot-email").value.trim();
+    const msgEl = document.getElementById("forgot-msg");
+    msgEl.textContent = "";
 
-    const authOverlay = document.getElementById("auth-overlay");
+    if (!email) {
+      msgEl.textContent = "Silakan masukkan alamat email Anda.";
+      msgEl.className = "text-xs font-medium bg-red-50 text-red-500 border border-red-100 p-2.5 rounded-lg";
+      return;
+    }
 
-    if (user) {
-        console.log("STATUS: SUDAH LOGIN");
+    try {
+      await sendPasswordResetEmail(auth, email);
+      msgEl.textContent = "Link reset password telah dikirim ke email Anda. Silakan cek Inbox/Spam.";
+      msgEl.className = "text-xs font-medium bg-emerald-50 text-emerald-600 border border-emerald-200 p-2.5 rounded-lg";
+    } catch (e) {
+      msgEl.textContent = terjemahErrorFirebase(e.code);
+      msgEl.className = "text-xs font-medium bg-red-50 text-red-500 border border-red-100 p-2.5 rounded-lg";
+    }
+  });
+
+  // 6. LOG OUT / KELUAR
+  document.getElementById("btn-logout")?.addEventListener("click", async () => {
+    if (confirm("Apakah Anda yakin ingin keluar dari akun ini?")) {
+      try {
+        await signOut(auth);
+        alert("Anda telah keluar.");
+      } catch (e) {
+        alert("Gagal keluar: " + e.message);
+      }
+    }
+  });
+
+// 7. STATUS LOGIN
+    onAuthStateChanged(auth, (user) => {
+      const authOverlay = document.getElementById("auth-overlay");
+      if (user) {
         if (authOverlay) authOverlay.style.display = "none";
-    } else {
-        console.log("STATUS: BELUM LOGIN");
+      } else {
         if (authOverlay) authOverlay.style.display = "flex";
+      }
+    });
+
+    function terjemahErrorFirebase(code) {
+      switch (code) {
+        case "auth/email-already-in-use": return "Email sudah terdaftar.";
+        case "auth/invalid-email": return "Format email tidak valid.";
+        case "auth/weak-password": return "Password minimal 6 karakter.";
+        case "auth/user-not-found": return "Akun email ini tidak ditemukan.";
+        case "auth/wrong-password": return "Password salah.";
+        case "auth/invalid-credential": return "Email atau password salah.";
+        default: return "Terjadi kesalahan: " + code;
+      }
     }
-});
 
-
-
-  function terjemahErrorFirebase(code) {
-    switch (code) {
-      case "auth/email-already-in-use": return "Email sudah terdaftar.";
-      case "auth/invalid-email": return "Format email tidak valid.";
-      case "auth/weak-password": return "Password minimal 6 karakter.";
-      case "auth/user-not-found": return "Akun tidak ditemukan.";
-      case "auth/wrong-password": return "Password salah.";
-      case "auth/invalid-credential": return "Email atau password salah.";
-      default: return "Terjadi kesalahan: " + code;
-    }
-  }
-
-// Fungsi untuk membuka modal login saat tombol di-klik
-function bukaModalLogin() {
-    const authOverlay = document.getElementById("auth-overlay");
-    if (authOverlay) authOverlay.style.display = "flex";
-}
-</script>
+    // Fungsi bukaModalLogin agar bisa dipanggil dari tombol mana saja
+    window.bukaModalLogin = function() {
+      const authOverlay = document.getElementById("auth-overlay");
+      if (authOverlay) authOverlay.style.display = "flex";
+    };
+  </script>
 
 </body>
 </html>
