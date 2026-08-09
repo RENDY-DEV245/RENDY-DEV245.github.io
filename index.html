@@ -2117,6 +2117,50 @@ window.loadPhotoLikes = async function() {
 
   googleProvider.setCustomParameters({ prompt: 'select_account' });
 
+// 1. FITUR LOGIN GOOGLE (RESPONSIF & AUTO-TUTUP MODAL)
+  document.getElementById("btn-google-login")?.addEventListener("click", async () => {
+    const btn = document.getElementById("btn-google-login");
+    const errorEl = document.getElementById("login-error");
+    if (errorEl) errorEl.textContent = "";
+
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+      }
+
+      // Membuka pop-up autentikasi Google
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // Simpan/perbarui data pengguna ke Firebase Database
+      await set(ref(db, "users/" + user.uid), {
+        username: user.displayName || "Google User",
+        email: user.email,
+        emailVerified: user.emailVerified,
+        lastLogin: new Date().toISOString()
+      });
+
+      // Otomatis menutup modal/pop-up login setelah berhasil
+      const authOverlay = document.getElementById("auth-overlay");
+      if (authOverlay) {
+        authOverlay.style.display = "none";
+      }
+
+    } catch (error) {
+      console.error("Error Login Google:", error);
+      // Mengabaikan error jika pengguna menutup pop-up secara manual
+      if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
+        if (errorEl) errorEl.textContent = terjemahErrorFirebase(error.code);
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+      }
+    }
+  });
+    
   // KONFIGURASI EMAILJS MILIK ANDA
   const EMAILJS_SERVICE_ID = "service_eqwhihi";
   const EMAILJS_PUBLIC_KEY = "sFzLru6fytB-WGPjN";
