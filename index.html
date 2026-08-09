@@ -2059,26 +2059,9 @@ googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
   // FUNGSI LOGIN GOOGLE
-  async function prosesLoginGoogle() {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-
-      // Simpan/Update data user di Database
-      await update(ref(db, "users/" + user.uid), {
-        username: user.displayName || user.email.split('@')[0],
-        email: user.email,
-        lastLogin: new Date().toISOString()
-      });
-
-    } catch (e) {
-      if (e.code === "auth/popup-blocked" || e.code === "auth/popup-closed-by-user") {
-        await signInWithRedirect(auth, googleProvider);
-      } else {
-        alert("Gagal Login Google (" + e.code + "): " + e.message);
-      }
-    }
-  }
+async function prosesLoginGoogle() {
+  await signInWithRedirect(auth, googleProvider);
+}
 
   // Event Listener tombol Google Login
   document.getElementById("btn-google-login")?.addEventListener("click", () => {
