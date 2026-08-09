@@ -1415,101 +1415,6 @@ const PRODUCT_DATABASE = {
             }
         }
 
-        class Three3DWorld {
-            constructor(containerId) {
-                this.container = document.getElementById(containerId);
-                if (!this.container) return;
-
-                this.scene = new THREE.Scene();
-                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-                this.particles = [];
-                this.mesh3D = null;
-
-                this.init();
-            }
-
-            init() {
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                this.container.appendChild(this.renderer.domElement);
-
-                this.camera.position.z = 10;
-
-                // ===== 3D CHARACTER SLIDER (ganti Torus Knot jadi panel karakter Sakura) =====
-                // ISI array di bawah ini dengan path gambar Sakura kamu sendiri.
-                // Taruh file gambarnya di folder /assets/sakura/ (bikin foldernya di server kamu).
-                this.characterImages = [
-                    'https://i.ibb.co.com/1JfPr3TZ/1786283691934.png',
-                    'https://i.ibb.co.com/1JfPr3TZ/1786283691934.png'
-                ];
-                this.characterIndex = 0;
-                this.clock = new THREE.Clock();
-
-                this.textureLoader = new THREE.TextureLoader();
-                const firstTexture = this.textureLoader.load(this.characterImages[0]);
-                firstTexture.colorSpace = THREE.SRGBColorSpace;
-
-                // Geometry dengan banyak segmen (48x64) supaya bisa dilekuk-lekukin jadi efek angin
-                const geometry = new THREE.PlaneGeometry(6.5, 8.5, 48, 64);
-                // Shader custom: rambut (bagian atas gambar) bergoyang kayak ketiup angin
-                const windVertexShader = `
-                    uniform float uTime;
-                    uniform float uWind;
-                    varying vec2 vUv;
-                    void main() {
-                        vUv = uv;
-                        vec3 pos = position;
-
-                        // hairMask: 0 di dagu/badan (bawah), makin ke atas (rambut) makin kuat
-                        float hairMask = pow(uv.y, 3.0);
-
-                        float wave1 = sin(pos.y * 5.5 + uTime * 3.0) * 0.16;
-                        float wave2 = sin(pos.y * 2.5 - uTime * 1.8 + pos.x) * 0.09;
-                        float gust  = sin(uTime * 0.8) * 0.5 + 0.5; // hembusan angin naik-turun
-
-                        pos.x += (wave1 + wave2) * uWind * hairMask * (0.6 + gust * 0.6);
-                        pos.z += cos(pos.y * 4.0 + uTime * 2.2) * 0.14 * uWind * hairMask;
-
-                        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-                    }
-                `;
-                const windFragmentShader = `
-                    uniform sampler2D uTexture;
-                    uniform float uOpacity;
-                    varying vec2 vUv;
-                    void main() {
-                        vec4 tex = texture2D(uTexture, vUv);
-                        if (tex.a < 0.05) discard;
-                        gl_FragColor = vec4(tex.rgb, tex.a * uOpacity);
-                    }
-                `;
-
-                const material = new THREE.ShaderMaterial({
-                    uniforms: {
-                        uTexture: { value: firstTexture },
-                        uTime: { value: 0 },
-                        uWind: { value: 0.6 },
-                        uOpacity: { value: 0.92 }
-                    },
-                    vertexShader: windVertexShader,
-                    fragmentShader: windFragmentShader,
-                    transparent: true,
-                    side: THREE.DoubleSide
-                });
-                this.mesh3D = new THREE.Mesh(geometry, material);
-                this.mesh3D.position.set(2.2, 0.6, 0);
-                this.scene.add(this.mesh3D);
-
-// Responsif: perkecil panel di layar HP
-                this.updateCharacterScale();
-                window.addEventListener('resize', () => this.updateCharacterScale());
-
-                // Auto ganti karakter tiap 3.5 detik, dengan efek fade
-                this.characterTimer = setInterval(() => this.swapCharacter(), 3500);
-
-           
-
 class Three3DWorld {
             constructor(containerId) {
                 this.container = document.getElementById(containerId);
@@ -1601,7 +1506,7 @@ class Three3DWorld {
                 // Auto ganti karakter tiap 3.5 detik
                 this.characterTimer = setInterval(() => this.swapCharacter(), 3500);
 
-                // ===== PARTICLE SYSTEM DAUN SAKURA (GANTI BULATAN COKELAT) =====
+                // ===== PARTICLE SYSTEM DAUN SAKURA =====
                 const petalShape = new THREE.Shape();
                 petalShape.moveTo(0, 0);
                 petalShape.bezierCurveTo(0.1, 0.2, 0.25, 0.35, 0.2, 0.6);
@@ -1718,7 +1623,6 @@ class Three3DWorld {
                     p.rotation.y += p.userData.rotSpeedY;
                     p.rotation.z += p.userData.rotSpeedZ;
 
-                    // Jika daun sudah menyentuh batas bawah, kembalikan ke atas
                     if (p.position.y < -6) {
                         p.position.y = 7;
                         p.position.x = (Math.random() - 0.5) * 20;
@@ -1728,6 +1632,42 @@ class Three3DWorld {
                 this.renderer.render(this.scene, this.camera);
             }
         }
+        
+                        
+           
+
+class Three3DWorld {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                if (!this.container) return;
+
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                this.particles = [];
+                this.mesh3D = null;
+
+                this.init();
+e: { value: firstTexture },
+                        uTime: { value: 0 },
+                        uWind: { value: 0.6 },
+                        uOpacity: { value: 0.92 }
+                    },
+                    vertexShader: windVertexShader,
+                    fragmentShader: windFragmentShader,
+                    transparent: true,
+                    side: THREE.DoubleSide
+                });
+                
+                this.mesh3D = new THREE.Mesh(geometry, material);
+                // Posisi Y disesuaikan (-0.8) agar bagian bawah badan pas menyentuh perbatasan
+                this.mesh3D.position.set(2.2, -0.8, 0);
+                this.scene.add(this.mesh3D);
+
+                this.updateCharacterScale();
+                window.addEventListener('resize', () => this.updateCharacterScale());
+
+                // Auto ganti karakter tiap 3.5 detik
 
         class App {
             constructor() {
