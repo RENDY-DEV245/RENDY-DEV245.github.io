@@ -2128,15 +2128,21 @@ async function prosesLoginGoogle() {
 
 // STATUS LOGIN (STATE LISTENER)
 onAuthStateChanged(auth, (user) => {
+    console.log("=== CEK FIREBASE AUTH ===");
+    console.log("USER:", user);
+    console.log("UID:", user ? user.uid : "NULL");
+    console.log("EMAIL:", user ? user.email : "NULL");
+
     const authOverlay = document.getElementById("auth-overlay");
 
     if (user) {
-        console.log("USER SUDAH LOGIN:", user.email);
-
-        if (authOverlay) {
-            authOverlay.classList.add("hidden");
-            authOverlay.style.setProperty("display", "none", "important");
-        }
+        console.log("STATUS: SUDAH LOGIN");
+        if (authOverlay) authOverlay.style.display = "none";
+    } else {
+        console.log("STATUS: BELUM LOGIN");
+        if (authOverlay) authOverlay.style.display = "flex";
+    }
+});
 
     } else {
         console.log("USER BELUM LOGIN");
