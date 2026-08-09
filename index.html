@@ -2113,8 +2113,11 @@ window.loadPhotoLikes = async function() {
   document.getElementById('tab-reg-btn')?.addEventListener('click', bukaTabDaftar);
 </script>
 
-<!-- SCRIPT FIREBASE SDK v12 -->
+
+       
+<!-- SCRIPT FIREBASE SDK v12 (LENGKAP + FITUR NOTIFIKASI FCM) -->
 <script type="module">
+  // 1. IMPORT SEMUA SDK FIREBASE (TERMASUK MESSAGING)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
   import { 
@@ -2130,7 +2133,10 @@ window.loadPhotoLikes = async function() {
     setPersistence,
     browserLocalPersistence
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-messaging.js";
+
+  // 2. KONFIGURASI FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
     authDomain: "web-afc.firebaseapp.com",
@@ -2142,73 +2148,104 @@ window.loadPhotoLikes = async function() {
     measurementId: "G-MZJ6DDCJCS"
   };
 
+  // 3. INISIALISASI UTAMA (HANYA DIPANGGIL 1 KALI)
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
   const auth = getAuth(app);
   setPersistence(auth, browserLocalPersistence).catch((err) => console.error("Gagal set persistence:", err));  
   const db = getDatabase(app);
   const googleProvider = new GoogleAuthProvider();
-
   googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-// 1. FITUR LOGIN GOOGLE (PERBAIKAN SOLUSI DATABASE)
-document.getElementById("btn-google-login")?.addEventListener("click", async () => {
-  const btn = document.getElementById("btn-google-login");
-  const errorEl = document.getElementById("login-error");
-  if (errorEl) errorEl.textContent = "";
+  // 4. INISIALISASI FIREBASE MESSAGING (PUSH NOTIFICATION)
+  const messaging = getMessaging(app);
 
-  try {
-    if (btn) {
-      btn.disabled = true;
-      btn.style.opacity = "0.7";
-    }
-
-    // 1. Membuka pop-up autentikasi Google
-    const result = await signInWithPopup(auth, googleProvider);
-    const user = result.user;
-
-    // 2. KUNCI PERBAIKAN: Langsung tutup modal login karena Google Auth SUDAH SUKSES!
-    const authOverlay = document.getElementById("auth-overlay");
-    if (authOverlay) {
-      authOverlay.style.display = "none";
-    }
-
-    // 3. Simpan data pengguna ke Database secara Latar Belakang (Tidak memblokir Login)
-    set(ref(db, "users/" + user.uid), {
-      username: user.displayName || "Google User",
-      email: user.email,
-      emailVerified: user.emailVerified,
-      lastLogin: new Date().toISOString()
-    }).catch(dbErr => console.warn("Peringatan Database:", dbErr));
-
-  } catch (error) {
-    console.error("Error Login Google:", error);
-    if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
-      if (errorEl) {
-        errorEl.textContent = terjemahErrorFirebase(error);
+  // FUNGSI MINTA IZIN NOTIFIKASI & SIMPAN TOKEN FCM
+  async function setupPushNotification(userId = null) {
+    try {
+      if (!("Notification" in window)) {
+        console.warn("Browser tidak mendukung notifikasi.");
+        return;
       }
-    }
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.style.opacity = "1";
+
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        const token = await getToken(messaging, { 
+          vapidKey: "BPaGr4BDKVjmQhNRHP3RfHhglvLLYY8zVbNF0_u5-84GiRH-hiwnFdBZgVL-WFbcJ7RpDNTwjyCy9W8N_HL8UXI" 
+        });
+
+        if (token) {
+          console.log("FCM TOKEN KAMU:", token);
+          if (userId) {
+            await set(ref(db, "fcm_tokens/" + userId), {
+              token: token,
+              updatedAt: new Date().toISOString()
+            });
+          }
+        }
+      } else {
+        console.log("Izin push notification ditolak user.");
+      }
+    } catch (err) {
+      console.error("Gagal mengambil FCM Token:", err);
     }
   }
-});
-    
-  // KONFIGURASI EMAILJS MILIK ANDA
+
+  // TERIMA NOTIFIKASI SAAT WEB DIBUKA (Foreground)
+  onMessage(messaging, (payload) => {
+    console.log("Pesan masuk saat web dibuka:", payload);
+    alert(`${payload.notification.title}\n${payload.notification.body}`);
+  });
+
+  // 5. FITUR LOGIN GOOGLE
+  document.getElementById("btn-google-login")?.addEventListener("click", async () => {
+    const btn = document.getElementById("btn-google-login");
+    const errorEl = document.getElementById("login-error");
+    if (errorEl) errorEl.textContent = "";
+
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+      }
+
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      const authOverlay = document.getElementById("auth-overlay");
+      if (authOverlay) authOverlay.style.display = "none";
+
+      set(ref(db, "users/" + user.uid), {
+        username: user.displayName || "Google User",
+        email: user.email,
+        emailVerified: user.emailVerified,
+        lastLogin: new Date().toISOString()
+      }).catch(dbErr => console.warn("Peringatan Database:", dbErr));
+
+    } catch (error) {
+      console.error("Error Login Google:", error);
+      if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
+        if (errorEl) errorEl.textContent = terjemahErrorFirebase(error.code);
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+      }
+    }
+  });
+
+  // 6. KONFIGURASI EMAILJS & REGISTER OTP
   const EMAILJS_SERVICE_ID = "service_eqwhihi";
   const EMAILJS_PUBLIC_KEY = "sFzLru6fytB-WGPjN";
   const EMAILJS_TEMPLATE_ID = "template_gy966lh";
 
   let pendingRegistrationData = null;
 
-  // Inisialisasi EmailJS SDK Resmi
   if (window.emailjs) {
-    emailjs.init("sFzLru6fytB-WGPjN");
+    emailjs.init(EMAILJS_PUBLIC_KEY);
   }
 
-  // 2. REGISTER DENGAN OTP EMAILJS (SDK RESMI)
   document.getElementById("btn-register")?.addEventListener("click", async () => {
     const username = document.getElementById("reg-username").value.trim();
     const email = document.getElementById("reg-email").value.trim();
@@ -2239,8 +2276,7 @@ document.getElementById("btn-google-login")?.addEventListener("click", async () 
 
       pendingRegistrationData = { email, cleanEmail };
 
-      // Kirim Email OTP menggunakan SDK Resmi EmailJS
-      const response = await emailjs.send("service_eqwhihi", "template_gy966lh", {
+      const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
         to_email: email,
         to_name: username,
         otp_code: generatedOTP
@@ -2258,7 +2294,8 @@ document.getElementById("btn-google-login")?.addEventListener("click", async () 
       btnRegister.innerText = "Daftar & Kirim OTP Email";
     }
   });
-  // 3. VERIFIKASI KODE OTP
+
+  // 7. VERIFIKASI KODE OTP
   document.getElementById("btn-verify-otp")?.addEventListener("click", async () => {
     const inputOTP = document.getElementById("otp-input").value.trim();
     const errorEl = document.getElementById("otp-error");
@@ -2306,7 +2343,7 @@ document.getElementById("btn-google-login")?.addEventListener("click", async () 
     }
   });
 
-  // 4. LOGIN MANUAL
+  // 8. LOGIN MANUAL EMAIL & PASSWORD
   document.getElementById("btn-login")?.addEventListener("click", async () => {
     const email = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-password").value;
@@ -2320,7 +2357,7 @@ document.getElementById("btn-google-login")?.addEventListener("click", async () 
     }
   });
 
-  // 5. LUPA / RESET PASSWORD
+  // 9. LUPA / RESET PASSWORD
   document.getElementById("btn-forgot")?.addEventListener("click", async () => {
     const email = document.getElementById("forgot-email").value.trim();
     const msgEl = document.getElementById("forgot-msg");
@@ -2342,7 +2379,7 @@ document.getElementById("btn-google-login")?.addEventListener("click", async () 
     }
   });
 
-  // 6. LOG OUT / KELUAR
+  // 10. LOG OUT / KELUAR
   document.getElementById("btn-logout")?.addEventListener("click", async () => {
     if (confirm("Apakah Anda yakin ingin keluar dari akun ini?")) {
       try {
@@ -2354,129 +2391,37 @@ document.getElementById("btn-google-login")?.addEventListener("click", async () 
     }
   });
 
-// 7. STATUS LOGIN
-    onAuthStateChanged(auth, (user) => {
-      const authOverlay = document.getElementById("auth-overlay");
-      if (user) {
-        if (authOverlay) authOverlay.style.display = "none";
-      } else {
-        if (authOverlay) authOverlay.style.display = "flex";
-      }
-    });
-
-    function terjemahErrorFirebase(code) {
-      switch (code) {
-        case "auth/email-already-in-use": return "Email sudah terdaftar.";
-        case "auth/invalid-email": return "Format email tidak valid.";
-        case "auth/weak-password": return "Password minimal 6 karakter.";
-        case "auth/user-not-found": return "Akun email ini tidak ditemukan.";
-        case "auth/wrong-password": return "Password salah.";
-        case "auth/invalid-credential": return "Email atau password salah.";
-        default: return "Terjadi kesalahan: " + code;
-      }
-    }
-
-    // Fungsi bukaModalLogin agar bisa dipanggil dari tombol mana saja
-    window.bukaModalLogin = function() {
-      const authOverlay = document.getElementById("auth-overlay");
-      if (authOverlay) authOverlay.style.display = "flex";
-    };
-
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
-  import { 
-    getAuth, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword, 
-    onAuthStateChanged, 
-    signOut,
-    sendPasswordResetEmail,
-    sendEmailVerification,
-    GoogleAuthProvider,
-    signInWithPopup,
-    setPersistence,
-    browserLocalPersistence
-  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
-  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
-  
-  // 1. IMPORT FIREBASE MESSAGING
-  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-messaging.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
-    authDomain: "web-afc.firebaseapp.com",
-    databaseURL: "https://web-afc-default-rtdb.firebaseio.com",
-    projectId: "web-afc",
-    storageBucket: "web-afc.firebasestorage.app",
-    messagingSenderId: "202313452502",
-    appId: "1:202313452502:web:57e2551bdab34ba3b1f277",
-    measurementId: "G-MZJ6DDCJCS"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const auth = getAuth(app);
-  setPersistence(auth, browserLocalPersistence).catch((err) => console.error("Gagal set persistence:", err));  
-  const db = getDatabase(app);
-  const googleProvider = new GoogleAuthProvider();
-
-  // 2. INISIALISASI MESSAGING
-  const messaging = getMessaging(app);
-
-  // 3. FUNGSI MINTA IZIN NOTIFIKASI & AMBIL TOKEN FCM
-  async function setupPushNotification(userId = null) {
-    try {
-      if (!("Notification" in window)) {
-        console.warn("Browser tidak mendukung notifikasi.");
-        return;
-      }
-
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        const token = await getToken(messaging, { 
-          vapidKey: "BPaGr4BDKVjmQhNRHP3RfHhglvLLYY8zVbNF0_u5-84GiRH-hiwnFdBZgVL-WFbcJ7RpDNTwjyCy9W8N_HL8UXI" 
-        });
-
-        if (token) {
-          console.log("FCM TOKEN KAMU:", token);
-
-          // Simpan Token FCM ke Database Firebase
-          if (userId) {
-            await set(ref(db, "fcm_tokens/" + userId), {
-              token: token,
-              updatedAt: new Date().toISOString()
-            });
-          }
-        }
-      } else {
-        console.log("Izin push notification ditolak user.");
-      }
-    } catch (err) {
-      console.error("Gagal mengambil FCM Token:", err);
-    }
-  }
-
-  // 4. TERIMA NOTIFIKASI SAAT WEB SEDANG DIBUKA (Foreground)
-  onMessage(messaging, (payload) => {
-    console.log("Pesan masuk saat web dibuka:", payload);
-    alert(`${payload.notification.title}\n${payload.notification.body}`);
-  });
-
-  googleProvider.setCustomParameters({ prompt: 'select_account' });
-
-  // 5. STATUS LOGIN (Otomatis minta izin notif jika user login)
+  // 11. STATUS LOGIN & NOTIFIKASI
   onAuthStateChanged(auth, (user) => {
     const authOverlay = document.getElementById("auth-overlay");
     if (user) {
       if (authOverlay) authOverlay.style.display = "none";
-      
-      // Minta izin dan simpan token FCM untuk user yang terdeteksi
+      // Jalankan izin notifikasi untuk user yang sedang login
       setupPushNotification(user.uid);
     } else {
       if (authOverlay) authOverlay.style.display = "flex";
     }
   });
-  </script>
+
+  // HELPER MENTERJEMAHKAN ERROR FIREBASE
+  function terjemahErrorFirebase(code) {
+    switch (code) {
+      case "auth/email-already-in-use": return "Email sudah terdaftar.";
+      case "auth/invalid-email": return "Format email tidak valid.";
+      case "auth/weak-password": return "Password minimal 6 karakter.";
+      case "auth/user-not-found": return "Akun email ini tidak ditemukan.";
+      case "auth/wrong-password": return "Password salah.";
+      case "auth/invalid-credential": return "Email atau password salah.";
+      default: return "Terjadi kesalahan: " + code;
+    }
+  }
+
+  // AKSES GLOBAL BUKA MODAL
+  window.bukaModalLogin = function() {
+    const authOverlay = document.getElementById("auth-overlay");
+    if (authOverlay) authOverlay.style.display = "flex";
+  };
+</script>
 
 </body>
     </html>
