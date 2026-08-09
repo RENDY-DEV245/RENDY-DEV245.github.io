@@ -17,20 +17,34 @@ const messaging = firebase.messaging();
 // Menangani notifikasi saat browser/tab ditutup (Background)
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Background message received: ', payload);
-  const notificationTitle = payload.notification.title || 'AFC Lifescience';
+  
+  const notificationTitle = payload.notification?.title || 'AFC Lifescience';
+  
+  // Ambil ikon dari isi notifikasi, jika kosong otomatis pakai Logo AFC
+  const iconUrl = payload.notification?.icon || 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg';
+  
+  // Ambil link URL tujuan saat notifikasi diklik
+  const targetUrl = payload.fcmOptions?.link || payload.data?.url || '/';
+
   const notificationOptions = {
-    body: payload.notification.body || '',
-    icon: payload.notification.icon || 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg',
-    data: payload.data
+    body: payload.notification?.body || '',
+    icon: iconUrl,
+    badge: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg', // Logo badge di layar/status bar HP
+    vibrate: [100, 50, 100], // Efek getar HP saat notifikasi masuk
+    data: {
+      ...payload.data,
+      url: targetUrl
+    }
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Ketika notifikasi diklik, buka link URL dari custom data
+// Ketika notifikasi diklik, buka link URL dari custom data / FCM
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const targetUrl = event.notification.data?.url || '/';
+  
   event.waitUntil(
     clients.openWindow(targetUrl)
   );
