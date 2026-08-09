@@ -1543,27 +1543,6 @@ class Three3DWorld {
                     }
                 `;
 
-                const material = new THREE.ShaderMaterial({
-                    uniforms: {
-                        uTexture: { value: firstTexture },
-                        uTime: { value: 0 },
-                        uWind: { value: 0.6 },
-                        uOpacity: { value: 0.92 }
-                    },
-                    vertexShader: windVertexShader,
-                    fragmentShader: windFragmentShader,
-                    transparent: true,
-                    side: THREE.DoubleSide
-                });
-                
-                this.mesh3D = new THREE.Mesh(geometry, material);
-                this.scene.add(this.mesh3D);
-
-                this.updateCharacterScale();
-                window.addEventListener('resize', () => this.updateCharacterScale());
-
-                // Auto ganti karakter tiap 3.5 detik
-                this.characterTimer = setInterval(() => this.swapCharacter(), 3500);
 
                 // ===== PARTICLE SYSTEM DAUN SAKURA =====
                 const petalShape = new THREE.Shape();
