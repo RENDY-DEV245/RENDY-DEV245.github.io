@@ -2060,7 +2060,13 @@ googleProvider.setCustomParameters({
 });
   // FUNGSI LOGIN GOOGLE
 async function prosesLoginGoogle() {
-    await signInWithRedirect(auth, googleProvider);
+    try {
+        const result = await signInWithPopup(auth, googleProvider);
+        console.log("GOOGLE LOGIN BERHASIL:", result.user.email);
+    } catch (error) {
+        console.error("GOOGLE LOGIN GAGAL:", error);
+        alert("Login Google gagal: " + error.message);
+    }
 }
 
   // Event Listener tombol Google Login
@@ -2068,20 +2074,7 @@ async function prosesLoginGoogle() {
     prosesLoginGoogle();
   });
 
-  // Tangkap redirect login Google (untuk perangkat yang memblokir Popup)
-  getRedirectResult(auth).then(async (result) => {
-    alert('REDIRECT RESULT: ' + (result ? 'DAPAT USER - ' + result.user.email : 'NULL/KOSONG'));
-    if (result && result.user) {
-      const user = result.user;
-      await update(ref(db, "users/" + user.uid), {
-        username: user.displayName || user.email.split('@')[0],
-        email: user.email,
-        lastLogin: new Date().toISOString()
-      });
-    }
-  }).catch((e) => {
-    if (e.code) alert("Error Redirect: " + e.code);
-  });
+ 
 
   // REGISTER MANUAL
   document.getElementById("btn-register")?.addEventListener("click", async () => {
