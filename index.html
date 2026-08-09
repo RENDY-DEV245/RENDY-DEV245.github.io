@@ -1413,8 +1413,40 @@ const PRODUCT_DATABASE = {
             closeBenefitModal() {
                 document.getElementById('benefitModal').classList.add('hidden');
             }
-      
+        }
 
+        class Three3DWorld {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                if (!this.container) return;
+
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                this.particles = [];
+                this.mesh3D = null;
+
+                this.init();
+            }
+
+            init() {
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                this.container.appendChild(this.renderer.domElement);
+
+                this.camera.position.z = 10;
+
+                // 3D "Hello World" Mesh Object (Golden Interactive Torus Knot)
+                const geometry = new THREE.TorusKnotGeometry(1.8, 0.4, 120, 16);
+                const material = new THREE.MeshBasicMaterial({ 
+                    color: 0xD4AF37, 
+                    wireframe: true, 
+                    transparent: true, 
+                    opacity: 0.35 
+                });
+                this.mesh3D = new THREE.Mesh(geometry, material);
+                this.mesh3D.position.set(3, 0, 0);
+                this.scene.add(this.mesh3D);
 
 // Sakura Petal Particle System (Ukuran Diperbesar)
 const sakuraShape = new THREE.Shape();
