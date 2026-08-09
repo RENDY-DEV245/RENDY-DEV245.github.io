@@ -2171,37 +2171,43 @@ window.loadPhotoLikes = async function() {
   googleProvider.setCustomParameters({ prompt: 'select_account' });
 
   
-    // 4. INISIALISASI FIREBASE MESSAGING (PUSH NOTIFICATION)
+    // 4. INISIALISASI FIREBASE MESSAGING & FUNGSI MINTA IZIN NOTIFIKASI
   const messaging = getMessaging(app);
 
-  // FUNGSI MINTA IZIN NOTIFIKASI & SIMPAN TOKEN FCM
   async function setupPushNotification(userId = null) {
     try {
       if (!("Notification" in window)) {
-        console.warn("Browser tidak mendukung notifikasi.");
-        return;
+        alert("Browser Anda tidak mendukung fitur Notifikasi Push.");
+        return false;
       }
 
+      // Minta izin ke browser
       const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        const token = await getToken(messaging, { 
-          vapidKey: "BPaGr4BDKVjmQhNRHP3RfHhglvLLYY8zVbNF0_u5-84GiRH-hiwnFdBZgVL-WFbcJ7RpDNTwjyCy9W8N_HL8UXI" 
-        });
-
-        if (token) {
-          console.log("FCM TOKEN KAMU:", token);
-          if (userId) {
-            await set(ref(db, "fcm_tokens/" + userId), {
-              token: token,
-              updatedAt: new Date().toISOString()
-            });
-          }
-        }
-      } else {
-        console.log("Izin push notification ditolak user.");
+      
+      // Jika pengguna menolak atau memblokir notifikasi
+      if (permission !== 'granted') {
+        console.log("Izin push notification ditolak/diblokir user.");
+        return false;
       }
+
+      // Jika diizinkan ('granted'), ambil Token FCM
+      const token = await getToken(messaging, { 
+        vapidKey: "BPaGr4BDKVjmQhNRHP3RfHhglvLLYY8zVbNF0_u5-84GiRH-hiwnFdBZgVL-WFbcJ7RpDNTwjyCy9W8N_HL8UXI" 
+      });
+
+      if (token) {
+        console.log("FCM TOKEN KAMU:", token);
+        if (userId) {
+          await set(ref(db, "fcm_tokens/" + userId), {
+            token: token,
+            updatedAt: new Date().toISOString()
+          });
+        }
+      }
+      return true; // Berhasil diizinkan
     } catch (err) {
       console.error("Gagal mengambil FCM Token:", err);
+      return false;
     }
   }
 
@@ -2211,13 +2217,13 @@ window.loadPhotoLikes = async function() {
     alert(`${payload.notification.title}\n${payload.notification.body}`);
   });
     
-// 5. FITUR LOGIN GOOGLE (WAJIB CENTANG NOTIFIKASI)
+  // 5. FITUR LOGIN GOOGLE (WAJIB CENTANG & IZINKAN NOTIFIKASI)
   document.getElementById("btn-google-login")?.addEventListener("click", async () => {
     const chkConsent = document.getElementById("chk-notif-consent");
     const errorEl = document.getElementById("login-error") || document.getElementById("reg-error");
     if (errorEl) errorEl.textContent = "";
 
-    // VALIDASI CENTANG NOTIFIKASI
+    // 1. Validasi Centang Checkbox
     if (!chkConsent || !chkConsent.checked) {
       if (errorEl) errorEl.textContent = "Anda wajib mencentang persetujuan izin notifikasi sebelum masuk dengan Google.";
       alert("Anda wajib mencentang persetujuan izin notifikasi untuk melanjutkan.");
@@ -2232,7 +2238,13 @@ window.loadPhotoLikes = async function() {
         btn.style.opacity = "0.7";
       }
 
-      await setupPushNotification();
+      // 2. Validasi Izin Browser (Jika "Blokir/Ditolak", LANGSUNG BATAL LOGIN)
+      const isNotifAllowed = await setupPushNotification();
+      if (!isNotifAllowed) {
+        if (errorEl) errorEl.textContent = "Akses notifikasi ditolak/diblokir di browser. Mohon izinkan notifikasi untuk dapat masuk.";
+        alert("Login dibatalkan karena Anda menolak/memblokir izin notifikasi browser.");
+        return; 
+      }
 
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
@@ -2262,7 +2274,7 @@ window.loadPhotoLikes = async function() {
     }
   });
 
-  // 6. REGISTER OTP EMAIL (WAJIB CENTANG NOTIFIKASI)
+  // 6. REGISTER OTP EMAIL (WAJIB CENTANG & IZINKAN NOTIFIKASI)
   document.getElementById("btn-register")?.addEventListener("click", async () => {
     const username = document.getElementById("reg-username").value.trim();
     const email = document.getElementById("reg-email").value.trim();
@@ -2277,18 +2289,24 @@ window.loadPhotoLikes = async function() {
       return;
     }
 
-    // VALIDASI CENTANG NOTIFIKASI
+    // 1. Validasi Centang Checkbox
     if (!chkConsent || !chkConsent.checked) {
       errorEl.textContent = "Anda wajib mencentang persetujuan izin notifikasi untuk mendaftar.";
       return;
+    }
+
+    // 2. Validasi Izin Browser (Jika "Blokir/Ditolak", LANGSUNG BATAL DAFTAR)
+    const isNotifAllowed = await setupPushNotification();
+    if (!isNotifAllowed) {
+      errorEl.textContent = "Pendaftaran dibatalkan karena Anda menolak/memblokir izin notifikasi di browser.";
+      alert("Pendaftaran dibatalkan karena Anda menolak/memblokir izin notifikasi browser.");
+      return; 
     }
 
     btnRegister.disabled = true;
     btnRegister.innerText = "Mengirim Kode OTP ke Email...";
 
     try {
-      await setupPushNotification();
-
       const generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
       const cleanEmail = email.replace(/[^a-zA-Z0-9]/g, "_");
 
@@ -2321,7 +2339,7 @@ window.loadPhotoLikes = async function() {
     }
   });
 
-  // 8. LOGIN MANUAL EMAIL & PASSWORD (WAJIB CENTANG NOTIFIKASI)
+  // 8. LOGIN MANUAL EMAIL & PASSWORD (WAJIB CENTANG & IZINKAN NOTIFIKASI)
   document.getElementById("btn-login")?.addEventListener("click", async () => {
     const email = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-password").value;
@@ -2334,19 +2352,27 @@ window.loadPhotoLikes = async function() {
       return;
     }
 
-    // VALIDASI CENTANG NOTIFIKASI
+    // 1. Validasi Centang Checkbox
     if (!chkConsent || !chkConsent.checked) {
       errorEl.textContent = "Anda wajib mencentang persetujuan izin notifikasi untuk melanjutkan masuk.";
       return;
     }
 
+    // 2. Validasi Izin Browser (Jika "Blokir/Ditolak", LANGSUNG BATAL LOGIN)
+    const isNotifAllowed = await setupPushNotification();
+    if (!isNotifAllowed) {
+      errorEl.textContent = "Login dibatalkan karena Anda menolak/memblokir izin notifikasi di browser.";
+      alert("Login dibatalkan karena Anda menolak/memblokir izin notifikasi browser.");
+      return; 
+    }
+
     try {
-      await setupPushNotification();
       await signInWithEmailAndPassword(auth, email, password);
     } catch (e) {
       errorEl.textContent = terjemahErrorFirebase(e.code);
     }
   });
+
 
   // 9. LUPA / RESET PASSWORD
   document.getElementById("btn-forgot")?.addEventListener("click", async () => {
