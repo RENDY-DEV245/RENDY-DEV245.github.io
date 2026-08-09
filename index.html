@@ -2160,8 +2160,6 @@ window.loadPhotoLikes = async function() {
   // 4. INISIALISASI FIREBASE MESSAGING (PUSH NOTIFICATION)
   const messaging = getMessaging(app);
 
-  // FUNGSI MINTA IZIN NOTIFIKASI & SIMPAN TOKEN FCM
-  // FUNGSI MINTA IZIN NOTIFIKASI & SIMPAN TOKEN (VERSI ANTI-GAGAL HP)
   async function setupPushNotification(userId = null) {
     try {
       if (!("Notification" in window)) {
@@ -2175,23 +2173,19 @@ window.loadPhotoLikes = async function() {
         return;
       }
 
-      // 1. Daftarkan Service Worker khusus untuk HP
       let swReg = null;
       if ('serviceWorker' in navigator) {
         swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
       }
 
-      // 2. Ambil Token FCM dari Firebase
       const token = await getToken(messaging, { 
         vapidKey: "BPaGr4BDKVjmQhNRHP3RfHhglvLLYY8zVbNF0_u5-84GiRH-hiwnFdBZgVL-WFbcJ7RpDNTwjyCy9W8N_HL8UXI",
         serviceWorkerRegistration: swReg
       });
 
       if (token) {
-        // Tentukan ID Penyimpanan (User ID jika login, atau ID Tamu jika belum login)
         const targetId = userId || ("guest_" + Math.random().toString(36).substring(2, 8));
 
-        // 3. Simpan ke Realtime Database
         await set(ref(db, "fcm_tokens/" + targetId), {
           token: token,
           updatedAt: new Date().toISOString()
@@ -2212,7 +2206,7 @@ window.loadPhotoLikes = async function() {
     console.log("Pesan masuk saat web dibuka:", payload);
     alert(`${payload.notification.title}\n${payload.notification.body}`);
   });
-
+    
   // 5. FITUR LOGIN GOOGLE
   document.getElementById("btn-google-login")?.addEventListener("click", async () => {
     const btn = document.getElementById("btn-google-login");
