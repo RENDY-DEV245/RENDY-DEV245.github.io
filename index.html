@@ -2098,8 +2098,8 @@ window.loadPhotoLikes = async function() {
     setPersistence,
     browserLocalPersistence
   } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
   const firebaseConfig = {
-      import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
     apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
     authDomain: "web-afc.firebaseapp.com",
     databaseURL: "https://web-afc-default-rtdb.firebaseio.com",
