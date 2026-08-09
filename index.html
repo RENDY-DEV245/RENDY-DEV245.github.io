@@ -2381,6 +2381,101 @@ document.getElementById("btn-google-login")?.addEventListener("click", async () 
       const authOverlay = document.getElementById("auth-overlay");
       if (authOverlay) authOverlay.style.display = "flex";
     };
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
+  import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    onAuthStateChanged, 
+    signOut,
+    sendPasswordResetEmail,
+    sendEmailVerification,
+    GoogleAuthProvider,
+    signInWithPopup,
+    setPersistence,
+    browserLocalPersistence
+  } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js";
+  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+  
+  // 1. IMPORT FIREBASE MESSAGING
+  import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-messaging.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
+    authDomain: "web-afc.firebaseapp.com",
+    databaseURL: "https://web-afc-default-rtdb.firebaseio.com",
+    projectId: "web-afc",
+    storageBucket: "web-afc.firebasestorage.app",
+    messagingSenderId: "202313452502",
+    appId: "1:202313452502:web:57e2551bdab34ba3b1f277",
+    measurementId: "G-MZJ6DDCJCS"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  setPersistence(auth, browserLocalPersistence).catch((err) => console.error("Gagal set persistence:", err));  
+  const db = getDatabase(app);
+  const googleProvider = new GoogleAuthProvider();
+
+  // 2. INISIALISASI MESSAGING
+  const messaging = getMessaging(app);
+
+  // 3. FUNGSI MINTA IZIN NOTIFIKASI & AMBIL TOKEN FCM
+  async function setupPushNotification(userId = null) {
+    try {
+      if (!("Notification" in window)) {
+        console.warn("Browser tidak mendukung notifikasi.");
+        return;
+      }
+
+      const permission = await Notification.requestPermission();
+      if (permission === 'granted') {
+        const token = await getToken(messaging, { 
+          vapidKey: "BPaGr4BDKVjmQhNRHP3RfHhglvLLYY8zVbNF0_u5-84GiRH-hiwnFdBZgVL-WFbcJ7RpDNTwjyCy9W8N_HL8UXI" 
+        });
+
+        if (token) {
+          console.log("FCM TOKEN KAMU:", token);
+
+          // Simpan Token FCM ke Database Firebase
+          if (userId) {
+            await set(ref(db, "fcm_tokens/" + userId), {
+              token: token,
+              updatedAt: new Date().toISOString()
+            });
+          }
+        }
+      } else {
+        console.log("Izin push notification ditolak user.");
+      }
+    } catch (err) {
+      console.error("Gagal mengambil FCM Token:", err);
+    }
+  }
+
+  // 4. TERIMA NOTIFIKASI SAAT WEB SEDANG DIBUKA (Foreground)
+  onMessage(messaging, (payload) => {
+    console.log("Pesan masuk saat web dibuka:", payload);
+    alert(`${payload.notification.title}\n${payload.notification.body}`);
+  });
+
+  googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+  // 5. STATUS LOGIN (Otomatis minta izin notif jika user login)
+  onAuthStateChanged(auth, (user) => {
+    const authOverlay = document.getElementById("auth-overlay");
+    if (user) {
+      if (authOverlay) authOverlay.style.display = "none";
+      
+      // Minta izin dan simpan token FCM untuk user yang terdeteksi
+      setupPushNotification(user.uid);
+    } else {
+      if (authOverlay) authOverlay.style.display = "flex";
+    }
+  });
   </script>
 
 </body>
