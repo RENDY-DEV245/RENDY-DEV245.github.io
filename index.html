@@ -2117,17 +2117,25 @@ async function prosesLoginGoogle() {
     const errorEl = document.getElementById("login-error");
     errorEl.textContent = "";
 
+    document.getElementById("btn-login").addEventListener("click", async () => {
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+    const errorEl = document.getElementById("login-error");
+
+    errorEl.textContent = "";
+
     try {
-    const result = await signInWithEmailAndPassword(auth, email, password);
+        const result = await signInWithEmailAndPassword(auth, email, password);
 
-    console.log("LOGIN SUKSES!");
-    console.log("USER:", result.user);
-    console.log("UID:", result.user.uid);
+        console.log("LOGIN SUKSES!");
+        console.log("USER:", result.user);
+        console.log("UID:", result.user.uid);
 
-} catch (e) {
-    console.error("LOGIN GAGAL:", e);
-    errorEl.textContent = terjemahErrorFirebase(e.code);
+    } catch (e) {
+        console.error("LOGIN GAGAL:", e);
+        errorEl.textContent = terjemahErrorFirebase(e.code);
     }
+});
 
   // STATUS LOGIN (STATE LISTENER)
 onAuthStateChanged(auth, async (user) => {
