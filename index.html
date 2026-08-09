@@ -1448,7 +1448,7 @@ const PRODUCT_DATABASE = {
                 this.mesh3D.position.set(3, 0, 0);
                 this.scene.add(this.mesh3D);
 
-                // Sakura Petal Particle System
+// Sakura Petal Particle System (Ukuran Diperbesar)
 const sakuraShape = new THREE.Shape();
 sakuraShape.moveTo(0, 0);
 sakuraShape.bezierCurveTo(0, 0.2, -0.25, 0.4, -0.25, 0.6);
@@ -1456,7 +1456,7 @@ sakuraShape.bezierCurveTo(-0.25, 0.85, 0, 1.0, 0.25, 0.85);
 sakuraShape.bezierCurveTo(0.25, 0.4, 0, 0.2, 0, 0);
 
 const geo = new THREE.ShapeGeometry(sakuraShape);
-geo.scale(0.18, 0.18, 0.18); // Ukuran kelopak sakura
+geo.scale(0.45, 0.45, 0.45); // <-- UKURAN DIPERBESAR DI SINI (dari 0.18 jadi 0.45)
 
 const mat = new THREE.MeshBasicMaterial({ 
     color: 0xFFB7C5, // Warna Pink Sakura
