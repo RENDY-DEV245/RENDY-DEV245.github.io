@@ -1299,92 +1299,60 @@ const PRODUCT_DATABASE = {
             }
         }
 
-        
-    class CartStore {
-        constructor() {
-            this.items = JSON.parse(localStorage.getItem('afc_cart_items') || '[]');
-            this.listeners = [];
-            this.currentUser = null;
-        }
-
-        setCurrentUser(user) {
-            this.currentUser = user;
-            if (user && this.items.length > 0) {
-                this.syncToFirebase('active');
+        class CartStore {
+            constructor() {
+                this.items = [];
+                this.listeners = [];
             }
-        }
 
-        addItem(product) {
-            const existing = this.items.find(i => i.id === product.id);
-            if (existing) {
-                existing.qty += 1;
-            } else {
-                this.items.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
-            }
-            this.saveAndNotify('active');
-        }
-
-        updateQty(index, change) {
-            if (index >= 0 && index < this.items.length) {
-                this.items[index].qty += change;
-                if (this.items[index].qty <= 0) {
-                    this.items.splice(index, 1);
+            addItem(product) {
+                const existing = this.items.find(i => i.id === product.id);
+                if (existing) {
+                    existing.qty += 1;
+                } else {
+                    this.items.push({ id: product.id, name: product.name, price: product.price, qty: 1 });
                 }
-                this.saveAndNotify(this.items.length > 0 ? 'active' : 'cleared');
+                this.notify();
+            }
+
+            updateQty(index, change) {
+                if (index >= 0 && index < this.items.length) {
+                    this.items[index].qty += change;
+                    if (this.items[index].qty <= 0) {
+                        this.items.splice(index, 1);
+                    }
+                    this.notify();
+                }
+            }
+
+            removeItem(index) {
+                if (index >= 0 && index < this.items.length) {
+                    this.items.splice(index, 1);
+                    this.notify();
+                }
+            }
+
+            getTotal() {
+                return this.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            }
+
+            getTotalQty() {
+                return this.items.reduce((sum, item) => sum + item.qty, 0);
+            }
+
+            subscribe(listener) {
+                this.listeners.push(listener);
+            }
+
+            notify() {
+                this.listeners.forEach(fn => fn(this.items));
             }
         }
 
-        removeItem(index) {
-            if (index >= 0 && index < this.items.length) {
-                this.items.splice(index, 1);
-                this.saveAndNotify(this.items.length > 0 ? 'active' : 'cleared');
+        class ModalController {
+            constructor(cartStore) {
+                this.cartStore = cartStore;
             }
-        }
-
-        clearCart(status = 'completed') {
-            this.items = [];
-            this.saveAndNotify(status);
-        }
-
-        getTotal() {
-            return this.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        }
-
-        getTotalQty() {
-            return this.items.reduce((sum, item) => sum + item.qty, 0);
-        }
-
-        subscribe(listener) {
-            this.listeners.push(listener);
-        }
-
-        saveAndNotify(status = 'active') {
-            localStorage.setItem('afc_cart_items', JSON.stringify(this.items));
-            this.listeners.forEach(fn => fn());
-            if (this.currentUser) {
-                this.syncToFirebase(status);
-            }
-        }
-
-        syncToFirebase(status = 'active') {
-            if (!this.currentUser || !window.firebaseDB || !window.refFn || !window.setFn) return;
-            try {
-                const cartRef = window.refFn(window.firebaseDB, 'user_carts/' + this.currentUser.uid);
-                window.setFn(cartRef, {
-                    items: this.items,
-                    status: status,
-                    updatedAt: new Date().toISOString()
-                });
-            } catch (e) {
-                console.warn('Gagal sync keranjang:', e);
-            }
-        }
-    }
-
-    class ModalController {
-        constructor(cartStore) {
-            this.cartStore = cartStore;
-        }
 
             openAboutModal() {
                 document.getElementById('aboutModal').classList.remove('hidden');
@@ -2162,7 +2130,6 @@ window.loadPhotoLikes = async function() {
        
 <!-- SCRIPT FIREBASE SDK v12 (LENGKAP + FITUR NOTIFIKASI FCM) -->
 <script type="module">
-    
   // 1. IMPORT SEMUA SDK FIREBASE (TERMASUK MESSAGING)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
@@ -2182,7 +2149,7 @@ window.loadPhotoLikes = async function() {
   import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
   import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-messaging.js";
 
-// 2. KONFIGURASI FIREBASE
+  // 2. KONFIGURASI FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
     authDomain: "web-afc.firebaseapp.com",
@@ -2194,7 +2161,7 @@ window.loadPhotoLikes = async function() {
     measurementId: "G-MZJ6DDCJCS"
   };
 
-  // 3. INISIALISASI UTAMA
+  // 3. INISIALISASI UTAMA (HANYA DIPANGGIL 1 KALI)
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
   const auth = getAuth(app);
@@ -2202,113 +2169,24 @@ window.loadPhotoLikes = async function() {
   const db = getDatabase(app);
   const messaging = getMessaging(app);
 
-  window.firebaseDB = db;
-  window.refFn = ref;
-  window.setFn = set;
-    
-// 2. Registrasi Service Worker Push Notification Background
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/firebase-messaging-sw.js')
-    .then((reg) => console.log('Service Worker terdaftar:', reg.scope))
-    .catch((err) => console.warn('Gagal pendaftaran Service Worker:', err));
-}
-
-// 3. Set Current User di CartStore saat User Login
-onAuthStateChanged(auth, (user) => {
-  const authOverlay = document.getElementById("auth-overlay");
-  if (user) {
-    if (authOverlay) authOverlay.style.display = "none";
-    setupPushNotification(user.uid);
-    if (window.app && window.app.cartStore) {
-      window.app.cartStore.setCurrentUser(user);
-    }
-  } else {
-    if (authOverlay) authOverlay.style.display = "flex";
-  }
-});
-
-// Fungsi Notifikasi HP Android & Laptop (Cross-Platform)
-function sendWebNotification(title, options) {
-  if (Notification.permission !== "granted") return;
-  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.ready.then((reg) => {
-      reg.showNotification(title, options);
-    }).catch(() => {
-      try { new Notification(title, options); } catch(e){}
-    });
-  } else {
-    try { new Notification(title, options); } catch(e){}
-  }
-}
-
-// 4. Trigger Notifikasi Keranjang Terbengkalai Saat Tab Tidak Aktif / Ditutup
-let abandonedCartTimer = null;
-const INACTIVITY_LIMIT_MS = 2 * 60 * 1000; // 2 Menit tidak aktif
-
-function triggerAbandonedCartCheck() {
-  if (abandonedCartTimer) clearTimeout(abandonedCartTimer);
-
-  abandonedCartTimer = setTimeout(() => {
-    if (window.app && window.app.cartStore) {
-      const cartItems = window.app.cartStore.items;
-      if (cartItems.length > 0) {
-        // Update status di Firebase Database menjadi 'abandoned'
-        window.app.cartStore.syncToFirebase('abandoned');
-
-        // Tampilkan Notifikasi Push (Support HP Android & Laptop)
-        const firstItemName = cartItems[0].name;
-        const totalQty = window.app.cartStore.getTotalQty();
-        
-        sendWebNotification("Lanjutkan Pesanan Suplemen AFC Anda! 🛍️", {
-          body: `Ada ${totalQty} produk (${firstItemName}) yang masih ada di keranjang. Klik untuk selesaikan pesanan!`,
-          icon: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg',
-          tag: 'abandoned-cart'
-        });
-      }
-    }
-  }, INACTIVITY_LIMIT_MS);
-}
-
-// Deteksi saat pengguna berpindah tab / meminimalkan browser
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden") {
-    triggerAbandonedCartCheck();
-  } else {
-    if (abandonedCartTimer) clearTimeout(abandonedCartTimer);
-  }
-});
-
-// Deteksi saat pengguna menutup halaman
-window.addEventListener("beforeunload", () => {
-  if (window.app && window.app.cartStore && window.app.cartStore.items.length > 0) {
-    window.app.cartStore.syncToFirebase('abandoned');
-  }
-});
-
-// 5. Bersihkan Keranjang & Ubah Status Jadi 'Completed' Saat Checkout WhatsApp
-if (window.app && window.app.processCheckout) {
-  const oldCheckout = window.app.processCheckout.bind(window.app);
-  window.app.processCheckout = function(e) {
-    oldCheckout(e);
-    this.cartStore.clearCart('completed');
-  };
-}
-
-// Tampilkan notifikasi saat website SEDANG DIBUKA (foreground)
-onMessage(messaging, (payload) => {
+  // Tampilkan notifikasi saat website SEDANG DIBUKA (foreground)
+  onMessage(messaging, (payload) => {
     console.log("Pesan FCM diterima (foreground):", payload);
     const title = payload.notification?.title || "Notifikasi AFC Lifescience";
     const body = payload.notification?.body || "";
     
-    sendWebNotification(title, {
+    if (Notification.permission === "granted") {
+      new Notification(title, {
         body: body,
         icon: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg'
-    });
-});
-    
-  
-    
-    // 4. FUNGSI MINTA IZIN NOTIFIKASI (FIX: TIDAK AKAN FITNAH MENOLAK)
+      });
+    }
+  });
+
+  const googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+// 4. FUNGSI MINTA IZIN NOTIFIKASI (FIX: TIDAK AKAN FITNAH MENOLAK)
   async function setupPushNotification(userId = null) {
     if (!("Notification" in window)) {
       alert("Browser Anda tidak mendukung fitur Notifikasi Push.");
@@ -2351,7 +2229,7 @@ onMessage(messaging, (payload) => {
     return true; // USER SUDAH TEKAN IZINKAN! AKSEPTASI LOGIN DITERIMA!
     }
     
-// 5. FITUR LOGIN GOOGLE (MENGHINDARI POPUP BLOCKER HP)
+  // 5. FITUR LOGIN GOOGLE (WAJIB CENTANG & IZINKAN NOTIFIKASI)
   document.getElementById("btn-google-login")?.addEventListener("click", async () => {
     const chkConsent = document.getElementById("chk-notif-consent");
     const errorEl = document.getElementById("login-error") || document.getElementById("reg-error");
@@ -2372,14 +2250,20 @@ onMessage(messaging, (payload) => {
         btn.style.opacity = "0.7";
       }
 
-      // 2. LANGSUNG BUKA GOOGLE LOGIN (Agar tidak diblokir Pop-up Blocker HP!)
+      // 2. Validasi Izin Browser (Jika "Blokir/Ditolak", LANGSUNG BATAL LOGIN)
+      const isNotifAllowed = await setupPushNotification();
+      if (!isNotifAllowed) {
+        if (errorEl) errorEl.textContent = "Akses notifikasi ditolak/diblokir di browser. Mohon izinkan notifikasi untuk dapat masuk.";
+        alert("Login dibatalkan karena Anda menolak/memblokir izin notifikasi browser.");
+        return; 
+      }
+
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
       const authOverlay = document.getElementById("auth-overlay");
       if (authOverlay) authOverlay.style.display = "none";
 
-      // 3. Simpan User & Minta Izin Notifikasi Setelah Login Berhasil
       await set(ref(db, "users/" + user.uid), {
         username: user.displayName || "Google User",
         email: user.email,
@@ -2387,13 +2271,12 @@ onMessage(messaging, (payload) => {
         lastLogin: new Date().toISOString()
       }).catch(dbErr => console.warn("Peringatan Database:", dbErr));
 
-      // 4. Proses Notifikasi di Background
       await setupPushNotification(user.uid);
 
     } catch (error) {
       console.error("Error Login Google:", error);
-      if (error && error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
-        if (errorEl) errorEl.textContent = terjemahErrorFirebase(error);
+      if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
+        if (errorEl) errorEl.textContent = terjemahErrorFirebase(error.code);
       }
     } finally {
       if (btn) {
@@ -2561,6 +2444,7 @@ onMessage(messaging, (payload) => {
     }
   });
 
+
   // 9. LUPA / RESET PASSWORD
   document.getElementById("btn-forgot")?.addEventListener("click", async () => {
     const email = document.getElementById("forgot-email").value.trim();
@@ -2595,6 +2479,17 @@ onMessage(messaging, (payload) => {
     }
   });
 
+  // 11. STATUS LOGIN & NOTIFIKASI
+  onAuthStateChanged(auth, (user) => {
+    const authOverlay = document.getElementById("auth-overlay");
+    if (user) {
+      if (authOverlay) authOverlay.style.display = "none";
+      // Jalankan izin notifikasi untuk user yang sedang login
+      setupPushNotification(user.uid);
+    } else {
+      if (authOverlay) authOverlay.style.display = "flex";
+    }
+  });
 
   // HELPER MENTERJEMAHKAN ERROR FIREBASE
   function terjemahErrorFirebase(code) {
