@@ -2535,19 +2535,17 @@ window.loadPhotoLikes = async function() {
 
 
 // =========================================================================
-// 🛒 INTEGRASI FIREBASE REALTIME DATABASE & EMAILJS: AUTOMATED ABANDONED CART
+// 🛒 INTEGRASI FIREBASE REALTIME DATABASE & EMAILJS (FIXED REALTIME EMAIL)
 // =========================================================================
 import { remove } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
 
-// Helper Format Rupiah
 const formatRupiah = (num) => 'Rp ' + Number(num || 0).toLocaleString('id-ID');
 
 window.abandonedItemsData = [];
 window.abandonedInSessionTimer = null; 
 let hasSentAbandonedEmail = false; 
 
-// Delay 30 Detik (30000ms)
-const LIVE_ABANDONED_DELAY = 30000; 
+const LIVE_ABANDONED_DELAY = 30000; // 30 Detik
 const ABANDONED_EMAIL_TEMPLATE_ID = "template_k4pjm0o"; // Template ID EmailJS Anda
 
 // 1. Simpan/Sync Otomatis ke Firebase Realtime Database
@@ -2596,7 +2594,7 @@ async function kirimEmailOtomatisAbandonedCart() {
   // A. Sinkronkan keranjang saat ini ke Realtime Database terlebih dahulu
   await window.syncAbandonedCartToFirebase();
 
-  // B. Ambil data REALTIME langsung dari node Realtime Database (abandoned_carts/{uid})
+  // B. Ambil data REALTIME langsung dari Realtime Database (abandoned_carts/{uid})
   const cartRef = ref(db, "abandoned_carts/" + user.uid);
   
   try {
@@ -2613,32 +2611,76 @@ async function kirimEmailOtomatisAbandonedCart() {
       return;
     }
 
-    // C. Format susunan produk dari Database menjadi rincian teks rapi
-    let rincianProdukDatabase = "";
+    // C. Format Tanggal Update
+    let formattedDate = "";
+    try {
+      const d = dbCartData.updatedAt ? new Date(dbCartData.updatedAt) : new Date();
+      formattedDate = d.toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) + " WIB";
+    } catch(e) {
+      formattedDate = new Date().toLocaleDateString('id-ID') + " WIB";
+    }
+
+    // D. Susun Rincian Produk (Versi HTML Rapi & Versi Plain Text WA)
+    let cartItemsHtml = "";
+    let cartItemsWA = "";
+    let ordersArray = [];
+
     dbCartData.items.forEach((item, index) => {
       const subtotal = item.price * item.qty;
-      rincianProdukDatabase += `${index + 1}. ${item.name}\n   • Jumlah: ${item.qty} Pcs\n   • Harga Satuan: ${formatRupiah(item.price)}\n   • Subtotal: ${formatRupiah(subtotal)}\n\n`;
+      
+      // Tampilan Kotak HTML Rapi untuk Email
+      cartItemsHtml += `
+        <div style="padding: 10px 14px; margin-bottom: 8px; background-color: #1e293b; border-radius: 8px; border: 1px solid #334155;">
+          <div style="font-weight: bold; color: #f59e0b; font-size: 14px;">${index + 1}. ${item.name}</div>
+          <div style="color: #cbd5e1; font-size: 12px; margin-top: 4px;">• Jumlah: <b>${item.qty} Pcs</b></div>
+          <div style="color: #cbd5e1; font-size: 12px;">• Harga Satuan: ${formatRupiah(item.price)}</div>
+          <div style="color: #10b981; font-size: 12px; font-weight: bold; margin-top: 2px;">• Subtotal: ${formatRupiah(subtotal)}</div>
+        </div>
+      `;
+
+      // Teks untuk Link WhatsApp
+      cartItemsWA += `${index + 1}. ${item.name} (${item.qty}x) - ${formatRupiah(subtotal)}\n`;
+
+      // Array Object jika EmailJS pakai {{#orders}}
+      ordersArray.push({
+        name: item.name,
+        qty: item.qty,
+        price: formatRupiah(item.price),
+        subtotal: formatRupiah(subtotal)
+      });
     });
 
-    // D. Parameter dinamis yang dikirimkan ke EmailJS (Presisi dengan data Realtime Database)
+    // E. Link WhatsApp Otomatis dengan Rincian Produk
+    const waPhone = "628118454455";
+    const waText = `Halo AFC Lifescience, saya ingin melanjutan pemesanan keranjang belanja saya:\n\n${cartItemsWA}\n*TOTAL PEMBELIAN: ${formatRupiah(dbCartData.totalAmount)}*\n\nMohon bantuannya untuk proses selanjutnya.`;
+    const waCheckoutUrl = `https://wa.me/${waPhone}?text=${encodeURIComponent(waText)}`;
+
+    // F. Parameter Lengkap ke EmailJS
     const templateParams = {
       to_email: dbCartData.email || user.email,
-      to_name: user.displayName || user.email.split('@')[0],
-      cart_items_details: rincianProdukDatabase.trim(),
+      to_name: user.displayName || user.email.split('@')[0] || "Pelanggan",
+      cart_items_details: cartItemsHtml, // Mengirimkan format HTML Rapi
       total_price: formatRupiah(dbCartData.totalAmount),
-      updated_at: new Date(dbCartData.updatedAt).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }),
-      checkout_link: window.location.href
+      updated_at: formattedDate,
+      checkout_link: waCheckoutUrl,
+      orders: ordersArray
     };
 
     if (window.emailjs) {
-      console.log("Mengirim email pengingat berdasarkan Realtime Database ke:", templateParams.to_email);
+      console.log("Mengirim email pengingat berbasis Realtime DB ke:", templateParams.to_email);
       await emailjs.send(EMAILJS_SERVICE_ID, ABANDONED_EMAIL_TEMPLATE_ID, templateParams);
-      console.log("SUCCESS: Email Abandoned Cart berbasis Realtime Database berhasil terkirim!");
-      hasSentAbandonedEmail = true; // Tandai agar tidak terkirim ganda
+      console.log("SUCCESS: Email Abandoned Cart berhasil terkirim!");
+      hasSentAbandonedEmail = true;
     }
 
   } catch (err) {
-    console.error("Gagal mengambil data Realtime Database / Kirim EmailJS:", err);
+    console.error("Gagal kirim email via EmailJS:", err);
   }
 }
 
