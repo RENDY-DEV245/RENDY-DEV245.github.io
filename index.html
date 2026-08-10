@@ -2585,74 +2585,7 @@ window.checkAbandonedCartOnLogin = async function(user) {
     if (snapshot.exists()) {
       const data = snapshot.val();
       if (data.items && data.items.length > 0) {
-        window.abandonedItemsData = data.items;
-        window.tampilkanBannerAbandoned(data.items.length, data.totalAmount);
-      }
-    }
-  } catch (err) {
-    console.warn("Gagal mengecek abandoned cart:", err);
-  }
-};
 
-// 3. Tampilkan Banner Notifikasi
-window.tampilkanBannerAbandoned = function(itemCount, totalAmount) {
-  const banner = document.getElementById("abandoned-cart-banner");
-  const textEl = document.getElementById("abandoned-cart-text");
-  if (banner) {
-    if (textEl) {
-      textEl.innerText = `Anda memiliki ${itemCount} produk (${formatRupiah(totalAmount)}) yang belum selesai di-checkout.`;
-    }
-    banner.classList.remove("hidden");
-  }
-};
-
-// 4. Buka Keranjang dari Banner
-window.bukaKeranjangTertinggal = function() {
-  if (window.abandonedItemsData && window.abandonedItemsData.length > 0) {
-    if (window.app.cartStore.items.length === 0) {
-      window.abandonedItemsData.forEach(item => {
-        window.app.cartStore.items.push(item);
-      });
-      window.app.cartStore.notify();
-    }
-  }
-  window.app.cartController.toggleDrawer(true);
-  window.tutupBannerAbandoned();
-};
-
-// 5. Tutup Banner
-window.tutupBannerAbandoned = function() {
-  const banner = document.getElementById("abandoned-cart-banner");
-  if (banner) banner.classList.add("hidden");
-};
-
-// 6. Hapus Data Saat Pemesanan Berhasil
-window.clearAbandonedCartFirebase = async function() {
-  const user = auth.currentUser;
-  if (window.abandonedInSessionTimer) clearTimeout(window.abandonedInSessionTimer);
-  if (!user) return;
-  try {
-    await remove(ref(db, "abandoned_carts/" + user.uid));
-    console.log("Abandoned cart dibersihkan.");
-  } catch (err) {
-    console.warn("Gagal menghapus abandoned cart:", err);
-  }
-};
-
-// 7. Pemicu Live Timer Tanpa Refresh
-window.startLiveInSessionTimer = function() {
-  if (window.abandonedInSessionTimer) clearTimeout(window.abandonedInSessionTimer);
-
-  window.abandonedInSessionTimer = setTimeout(() => {
-    if (window.app && window.app.cartStore && window.app.cartStore.items.length > 0) {
-      const items = window.app.cartStore.items;
-      window.abandonedItemsData = items;
-      window.tampilkanBannerAbandoned(items.length, window.app.cartStore.getTotal());
-    }
-  }, LIVE_ABANDONED_DELAY);
-};
-
-// =======================================
 
 // =========================================================================
 // 🛒 INTEGRASI FIREBASE & EMAILJS: AUTOMATED ABANDONED CART SYSTEM (CONNECTED)
