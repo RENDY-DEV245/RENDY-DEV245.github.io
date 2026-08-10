@@ -2593,17 +2593,6 @@ if (window.app && window.app.processCheckout) {
     }
   });
 
-  // 11. STATUS LOGIN & NOTIFIKASI
-  onAuthStateChanged(auth, (user) => {
-    const authOverlay = document.getElementById("auth-overlay");
-    if (user) {
-      if (authOverlay) authOverlay.style.display = "none";
-      // Jalankan izin notifikasi untuk user yang sedang login
-      setupPushNotification(user.uid);
-    } else {
-      if (authOverlay) authOverlay.style.display = "flex";
-    }
-  });
 
   // HELPER MENTERJEMAHKAN ERROR FIREBASE
   function terjemahErrorFirebase(code) {
