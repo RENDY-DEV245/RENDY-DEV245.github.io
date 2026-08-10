@@ -2653,6 +2653,197 @@ window.startLiveInSessionTimer = function() {
 };
 
 // =======================================
+
+// =========================================================================
+// 🛒 INTEGRASI FIREBASE & EMAILJS: AUTOMATED ABANDONED CART SYSTEM (CONNECTED)
+// =========================================================================
+import { remove } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+
+// Helper Format Rupiah
+const formatRupiah = (num) => 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+
+window.abandonedItemsData = [];
+window.abandonedInSessionTimer = null; 
+let hasSentAbandonedEmail = false; 
+
+// Delay 30 Detik (30000ms)
+const LIVE_ABANDONED_DELAY = 30000; 
+const ABANDONED_EMAIL_TEMPLATE_ID = "template_k4pjm0o"; // Template ID EmailJS Anda
+
+// 1. Fungsi Kirim Email Otomatis via EmailJS
+async function kirimEmailOtomatisAbandonedCart() {
+  const user = auth.currentUser;
+  
+  if (!user || !user.email) {
+    console.log("Abandoned Cart Email dilewati: User belum login.");
+    return;
+  }
+
+  if (!window.app || !window.app.cartStore || window.app.cartStore.items.length === 0) {
+    return;
+  }
+
+  if (hasSentAbandonedEmail) {
+    console.log("Email pengingat sudah terkirim untuk sesi ini.");
+    return;
+  }
+
+  const items = window.app.cartStore.items;
+  const totalAmount = window.app.cartStore.getTotal();
+
+  // Susun teks daftar barang dari keranjang Firebase
+  let cartItemsText = "";
+  items.forEach((item, index) => {
+    cartItemsText += `${index + 1}. ${item.name} (${item.qty}x) - ${formatRupiah(item.price * item.qty)}\n`;
+  });
+
+  // Generate ID transaksi unik untuk variabel {{order_id}} di Subject EmailJS Anda
+  const generatedOrderId = "CART-" + Math.floor(1000 + Math.random() * 9000);
+
+  // Parameter yang dikirim persis sesuai nama variabel di EmailJS Dashboard Anda
+  const templateParams = {
+    to_email: user.email,                                   // Mengisi {{to_email}} di EmailJS
+    to_name: user.displayName || user.email.split('@')[0],  // Mengisi {{to_name}}
+    order_id: generatedOrderId,                             // Mengisi {{order_id}} di Subject EmailJS
+    cart_items: cartItemsText,                              // Mengisi {{cart_items}}
+    total_price: formatRupiah(totalAmount),                 // Mengisi {{total_price}}
+    checkout_url: window.location.href                      // Link kembali ke web
+  };
+
+  try {
+    if (window.emailjs) {
+      console.log("Mengirim email ke:", user.email);
+      await emailjs.send(EMAILJS_SERVICE_ID, ABANDONED_EMAIL_TEMPLATE_ID, templateParams);
+      console.log("SUCCESS: Email Abandoned Cart berhasil terkirim via EmailJS!");
+      hasSentAbandonedEmail = true; // Tandai sudah terkirim agar tidak berulang
+    }
+  } catch (err) {
+    console.error("Gagal mengirim email via EmailJS:", err);
+  }
+}
+
+// 2. Simpan Otomatis ke Firebase Realtime Database
+window.syncAbandonedCartToFirebase = async function() {
+  if (!window.app || !window.app.cartStore) return;
+  const items = window.app.cartStore.items;
+  const user = auth.currentUser;
+
+  if (!user) return; 
+
+  const cartRef = ref(db, "abandoned_carts/" + user.uid);
+
+  try {
+    if (items && items.length > 0) {
+      await set(cartRef, {
+        userId: user.uid,
+        email: user.email,
+        items: items,
+        totalAmount: window.app.cartStore.getTotal(),
+        updatedAt: new Date().toISOString(),
+        status: "abandoned"
+      });
+      console.log("Data berhasil masuk ke Firebase: abandoned_carts/" + user.uid);
+    } else {
+      await remove(cartRef);
+    }
+  } catch (err) {
+    console.warn("Gagal simpan ke Firebase:", err);
+  }
+};
+
+// 3. Cek Keranjang Tertinggal Saat User Login
+window.checkAbandonedCartOnLogin = async function(user) {
+  if (!user) return;
+  try {
+    const snapshot = await get(ref(db, "abandoned_carts/" + user.uid));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      if (data.items && data.items.length > 0) {
+        window.abandonedItemsData = data.items;
+        window.tampilkanBannerAbandoned(data.items.length, data.totalAmount);
+      }
+    }
+  } catch (err) {
+    console.warn("Gagal cek abandoned cart:", err);
+  }
+};
+
+// 4. Tampilkan Banner Melayang di Web
+window.tampilkanBannerAbandoned = function(itemCount, totalAmount) {
+  const banner = document.getElementById("abandoned-cart-banner");
+  const textEl = document.getElementById("abandoned-cart-text");
+  if (banner) {
+    if (textEl) {
+      textEl.innerText = `Anda memiliki ${itemCount} produk (${formatRupiah(totalAmount)}) yang belum di-checkout.`;
+    }
+    banner.classList.remove("hidden");
+  }
+};
+
+// 5. Buka Keranjang dari Banner
+window.bukaKeranjangTertinggal = function() {
+  if (window.abandonedItemsData && window.abandonedItemsData.length > 0) {
+    if (window.app.cartStore.items.length === 0) {
+      window.abandonedItemsData.forEach(item => {
+        window.app.cartStore.items.push(item);
+      });
+      window.app.cartStore.notify();
+    }
+  }
+  window.app.cartController.toggleDrawer(true);
+  window.tutupBannerAbandoned();
+};
+
+// 6. Tutup Banner
+window.tutupBannerAbandoned = function() {
+  const banner = document.getElementById("abandoned-cart-banner");
+  if (banner) banner.classList.add("hidden");
+};
+
+// 7. Bersihkan Firebase Saat Checkout Sukses
+window.clearAbandonedCartFirebase = async function() {
+  const user = auth.currentUser;
+  if (window.abandonedInSessionTimer) clearTimeout(window.abandonedInSessionTimer);
+  hasSentAbandonedEmail = false;
+  
+  if (!user) return;
+  try {
+    await remove(ref(db, "abandoned_carts/" + user.uid));
+    console.log("Abandoned cart dibersihkan dari Firebase.");
+  } catch (err) {
+    console.warn("Gagal bersihkan abandoned cart:", err);
+  }
+};
+
+// 8. Timer Otomatis 30 Detik
+window.startLiveInSessionTimer = function() {
+  if (window.abandonedInSessionTimer) clearTimeout(window.abandonedInSessionTimer);
+  
+  hasSentAbandonedEmail = false; 
+
+  window.abandonedInSessionTimer = setTimeout(async () => {
+    if (window.app && window.app.cartStore && window.app.cartStore.items.length > 0) {
+      const items = window.app.cartStore.items;
+      window.abandonedItemsData = items;
+      
+      // A. Simpan ke Firebase Realtime Database
+      await window.syncAbandonedCartToFirebase();
+
+      // B. Tampilkan Banner Notifikasi di Web
+      window.tampilkanBannerAbandoned(items.length, window.app.cartStore.getTotal());
+
+      // C. Kirim Email Otomatis via EmailJS (template_k4pjm0o)
+      await kirimEmailOtomatisAbandonedCart();
+    }
+  }, LIVE_ABANDONED_DELAY);
+};
+
+// Pasang Listener Keranjang Belanja
+if (window.app && window.app.cartStore) {
+  window.app.cartStore.subscribe(() => {
+    window.startLiveInSessionTimer();
+  });
+    }    
 </script>
 
 </body>
