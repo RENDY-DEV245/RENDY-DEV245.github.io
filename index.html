@@ -2535,59 +2535,6 @@ window.loadPhotoLikes = async function() {
 
 
 // =========================================================================
-// 🛒 INTEGRASI FIREBASE: ABANDONED CART SYSTEM (FIX ERROR SECURITYUTILS)
-// =========================================================================
-import { remove } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
-
-// Helper Format Rupiah Mandiri (Mencegah Error SecurityUtils)
-const formatRupiah = (num) => 'Rp ' + Number(num || 0).toLocaleString('id-ID');
-
-window.abandonedItemsData = [];
-window.abandonedInSessionTimer = null; 
-
-// Waktu tunggu live tanpa refresh (30000 = 30 detik / setengah menit)
-const LIVE_ABANDONED_DELAY = 30000; 
-
-// 1. Simpan Otomatis ke Database "abandoned_carts"
-window.syncAbandonedCartToFirebase = async function() {
-  if (!window.app || !window.app.cartStore) return;
-  const items = window.app.cartStore.items;
-  const user = auth.currentUser;
-
-  if (!user) return; 
-
-  const cartRef = ref(db, "abandoned_carts/" + user.uid);
-
-  try {
-    if (items && items.length > 0) {
-      await set(cartRef, {
-        userId: user.uid,
-        email: user.email,
-        items: items,
-        totalAmount: window.app.cartStore.getTotal(),
-        updatedAt: new Date().toISOString(),
-        status: "abandoned"
-      });
-      console.log("Keranjang tersimpan di Firebase abandoned_carts");
-    } else {
-      await remove(cartRef);
-    }
-  } catch (err) {
-    console.warn("Gagal sinkronisasi abandoned cart:", err);
-  }
-};
-
-// 2. Cek Keranjang Tertinggal Saat Login/Buka Halaman
-window.checkAbandonedCartOnLogin = async function(user) {
-  if (!user) return;
-  try {
-    const snapshot = await get(ref(db, "abandoned_carts/" + user.uid));
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      if (data.items && data.items.length > 0) {
-
-
-// =========================================================================
 // 🛒 INTEGRASI FIREBASE & EMAILJS: AUTOMATED ABANDONED CART SYSTEM (CONNECTED)
 // =========================================================================
 import { remove } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
