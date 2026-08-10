@@ -2306,34 +2306,7 @@ onMessage(messaging, (payload) => {
     });
 });
     
-  const googleProvider = new GoogleAuthProvider();
-  googleProvider.setCustomParameters({ prompt: 'select_account' });
-
-// Fungsi Notifikasi HP Android & Laptop
-function sendWebNotification(title, options) {
-  if (Notification.permission !== "granted") return;
-  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.ready.then((reg) => {
-      reg.showNotification(title, options);
-    }).catch(() => {
-      try { new Notification(title, options); } catch(e){}
-    });
-  } else {
-    try { new Notification(title, options); } catch(e){}
-  }
-}
-
-// Tampilkan notifikasi saat website SEDANG DIBUKA (foreground)
-onMessage(messaging, (payload) => {
-    console.log("Pesan FCM diterima (foreground):", payload);
-    const title = payload.notification?.title || "Notifikasi AFC Lifescience";
-    const body = payload.notification?.body || "";
-    
-    sendWebNotification(title, {
-        body: body,
-        icon: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg'
-    });
-});
+  
     
     // 4. FUNGSI MINTA IZIN NOTIFIKASI (FIX: TIDAK AKAN FITNAH MENOLAK)
   async function setupPushNotification(userId = null) {
