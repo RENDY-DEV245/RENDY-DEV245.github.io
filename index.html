@@ -2227,6 +2227,20 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+// Fungsi Notifikasi HP Android & Laptop (Cross-Platform)
+function sendWebNotification(title, options) {
+  if (Notification.permission !== "granted") return;
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.ready.then((reg) => {
+      reg.showNotification(title, options);
+    }).catch(() => {
+      try { new Notification(title, options); } catch(e){}
+    });
+  } else {
+    try { new Notification(title, options); } catch(e){}
+  }
+}
+
 // 4. Trigger Notifikasi Keranjang Terbengkalai Saat Tab Tidak Aktif / Ditutup
 let abandonedCartTimer = null;
 const INACTIVITY_LIMIT_MS = 2 * 60 * 1000; // 2 Menit tidak aktif
@@ -2241,17 +2255,15 @@ function triggerAbandonedCartCheck() {
         // Update status di Firebase Database menjadi 'abandoned'
         window.app.cartStore.syncToFirebase('abandoned');
 
-        // Tampilkan Notifikasi Push
-        if (Notification.permission === "granted") {
-          const firstItemName = cartItems[0].name;
-          const totalQty = window.app.cartStore.getTotalQty();
-          
-          new Notification("Lanjutkan Pesanan Suplemen AFC Anda! 🛍️", {
-            body: `Ada ${totalQty} produk (${firstItemName}) yang masih ada di keranjang. Klik untuk selesaikan pesanan!`,
-            icon: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg',
-            tag: 'abandoned-cart'
-          });
-        }
+        // Tampilkan Notifikasi Push (Support HP Android & Laptop)
+        const firstItemName = cartItems[0].name;
+        const totalQty = window.app.cartStore.getTotalQty();
+        
+        sendWebNotification("Lanjutkan Pesanan Suplemen AFC Anda! 🛍️", {
+          body: `Ada ${totalQty} produk (${firstItemName}) yang masih ada di keranjang. Klik untuk selesaikan pesanan!`,
+          icon: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg',
+          tag: 'abandoned-cart'
+        });
       }
     }
   }, INACTIVITY_LIMIT_MS);
@@ -2281,26 +2293,49 @@ if (window.app && window.app.processCheckout) {
     this.cartStore.clearCart('completed');
   };
 }
-    
-    
-  // Tampilkan notifikasi saat website SEDANG DIBUKA (foreground)
-  onMessage(messaging, (payload) => {
+
+// Tampilkan notifikasi saat website SEDANG DIBUKA (foreground)
+onMessage(messaging, (payload) => {
     console.log("Pesan FCM diterima (foreground):", payload);
     const title = payload.notification?.title || "Notifikasi AFC Lifescience";
     const body = payload.notification?.body || "";
     
-    if (Notification.permission === "granted") {
-      new Notification(title, {
+    sendWebNotification(title, {
         body: body,
         icon: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg'
-      });
-    }
+    });
 });
     
   const googleProvider = new GoogleAuthProvider();
   googleProvider.setCustomParameters({ prompt: 'select_account' });
 
-// 4. FUNGSI MINTA IZIN NOTIFIKASI (FIX: TIDAK AKAN FITNAH MENOLAK)
+// Fungsi Notifikasi HP Android & Laptop
+function sendWebNotification(title, options) {
+  if (Notification.permission !== "granted") return;
+  if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.ready.then((reg) => {
+      reg.showNotification(title, options);
+    }).catch(() => {
+      try { new Notification(title, options); } catch(e){}
+    });
+  } else {
+    try { new Notification(title, options); } catch(e){}
+  }
+}
+
+// Tampilkan notifikasi saat website SEDANG DIBUKA (foreground)
+onMessage(messaging, (payload) => {
+    console.log("Pesan FCM diterima (foreground):", payload);
+    const title = payload.notification?.title || "Notifikasi AFC Lifescience";
+    const body = payload.notification?.body || "";
+    
+    sendWebNotification(title, {
+        body: body,
+        icon: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg'
+    });
+});
+    
+    // 4. FUNGSI MINTA IZIN NOTIFIKASI (FIX: TIDAK AKAN FITNAH MENOLAK)
   async function setupPushNotification(userId = null) {
     if (!("Notification" in window)) {
       alert("Browser Anda tidak mendukung fitur Notifikasi Push.");
