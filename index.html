@@ -2162,6 +2162,7 @@ window.loadPhotoLikes = async function() {
        
 <!-- SCRIPT FIREBASE SDK v12 (LENGKAP + FITUR NOTIFIKASI FCM) -->
 <script type="module">
+    
   // 1. IMPORT SEMUA SDK FIREBASE (TERMASUK MESSAGING)
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
   import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
@@ -2181,15 +2182,30 @@ window.loadPhotoLikes = async function() {
   import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
   import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-messaging.js";
 
-// =======================================================
-// FITUR TAMBAHAN: TRIGGER & SYNC ABANDONED CART
-// =======================================================
+// 2. KONFIGURASI FIREBASE
+  const firebaseConfig = {
+    apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
+    authDomain: "web-afc.firebaseapp.com",
+    databaseURL: "https://web-afc-default-rtdb.firebaseio.com",
+    projectId: "web-afc",
+    storageBucket: "web-afc.firebasestorage.app",
+    messagingSenderId: "202313452502",
+    appId: "1:202313452502:web:57e2551bdab34ba3b1f277",
+    measurementId: "G-MZJ6DDCJCS"
+  };
 
-// 1. Hubungkan Firebase Database ke Window
-window.firebaseDB = db;
-window.refFn = ref;
-window.setFn = set;
+  // 3. INISIALISASI UTAMA
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  setPersistence(auth, browserLocalPersistence).catch((err) => console.error("Gagal set persistence:", err));  
+  const db = getDatabase(app);
+  const messaging = getMessaging(app);
 
+  window.firebaseDB = db;
+  window.refFn = ref;
+  window.setFn = set;
+    
 // 2. Registrasi Service Worker Push Notification Background
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/firebase-messaging-sw.js')
@@ -2279,30 +2295,7 @@ if (window.app && window.app.processCheckout) {
         icon: 'https://i.ibb.co.com/gbjyKd3w/1630640134952.jpg'
       });
     }
-  });
-// 2. KONFIGURASI FIREBASE
-  const firebaseConfig = {
-    apiKey: "AIzaSyDhPqickxzqSFt6SHTYK73iTflPF4_ac4o",
-    authDomain: "web-afc.firebaseapp.com",
-    databaseURL: "https://web-afc-default-rtdb.firebaseio.com",
-    projectId: "web-afc",
-    storageBucket: "web-afc.firebasestorage.app",
-    messagingSenderId: "202313452502",
-    appId: "1:202313452502:web:57e2551bdab34ba3b1f277",
-    measurementId: "G-MZJ6DDCJCS"
-  };
-
-  // 3. INISIALISASI UTAMA
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  const auth = getAuth(app);
-  setPersistence(auth, browserLocalPersistence).catch((err) => console.error("Gagal set persistence:", err));  
-  const db = getDatabase(app);
-  const messaging = getMessaging(app);
-
-  window.firebaseDB = db;
-  window.refFn = ref;
-  window.setFn = set;
+});
     
   const googleProvider = new GoogleAuthProvider();
   googleProvider.setCustomParameters({ prompt: 'select_account' });
