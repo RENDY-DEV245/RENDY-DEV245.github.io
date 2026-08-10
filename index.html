@@ -2535,7 +2535,7 @@ window.loadPhotoLikes = async function() {
 
 
 // =========================================================================
-// 🛒 INTEGRASI FIREBASE & EMAILJS: AUTOMATED ABANDONED CART SYSTEM (CONNECTED)
+// 🛒 INTEGRASI FIREBASE REALTIME DATABASE & EMAILJS: AUTOMATED ABANDONED CART
 // =========================================================================
 import { remove } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
 
@@ -2550,59 +2550,7 @@ let hasSentAbandonedEmail = false;
 const LIVE_ABANDONED_DELAY = 30000; 
 const ABANDONED_EMAIL_TEMPLATE_ID = "template_k4pjm0o"; // Template ID EmailJS Anda
 
-// 1. Fungsi Kirim Email Otomatis via EmailJS
-async function kirimEmailOtomatisAbandonedCart() {
-  const user = auth.currentUser;
-  
-  if (!user || !user.email) {
-    console.log("Abandoned Cart Email dilewati: User belum login.");
-    return;
-  }
-
-  if (!window.app || !window.app.cartStore || window.app.cartStore.items.length === 0) {
-    return;
-  }
-
-  if (hasSentAbandonedEmail) {
-    console.log("Email pengingat sudah terkirim untuk sesi ini.");
-    return;
-  }
-
-  const items = window.app.cartStore.items;
-  const totalAmount = window.app.cartStore.getTotal();
-
-  // Susun teks daftar barang dari keranjang Firebase
-  let cartItemsText = "";
-  items.forEach((item, index) => {
-    cartItemsText += `${index + 1}. ${item.name} (${item.qty}x) - ${formatRupiah(item.price * item.qty)}\n`;
-  });
-
-  // Generate ID transaksi unik untuk variabel {{order_id}} di Subject EmailJS Anda
-  const generatedOrderId = "CART-" + Math.floor(1000 + Math.random() * 9000);
-
-  // Parameter yang dikirim persis sesuai nama variabel di EmailJS Dashboard Anda
-  const templateParams = {
-    to_email: user.email,                                   // Mengisi {{to_email}} di EmailJS
-    to_name: user.displayName || user.email.split('@')[0],  // Mengisi {{to_name}}
-    order_id: generatedOrderId,                             // Mengisi {{order_id}} di Subject EmailJS
-    cart_items: cartItemsText,                              // Mengisi {{cart_items}}
-    total_price: formatRupiah(totalAmount),                 // Mengisi {{total_price}}
-    checkout_url: window.location.href                      // Link kembali ke web
-  };
-
-  try {
-    if (window.emailjs) {
-      console.log("Mengirim email ke:", user.email);
-      await emailjs.send(EMAILJS_SERVICE_ID, ABANDONED_EMAIL_TEMPLATE_ID, templateParams);
-      console.log("SUCCESS: Email Abandoned Cart berhasil terkirim via EmailJS!");
-      hasSentAbandonedEmail = true; // Tandai sudah terkirim agar tidak berulang
-    }
-  } catch (err) {
-    console.error("Gagal mengirim email via EmailJS:", err);
-  }
-}
-
-// 2. Simpan Otomatis ke Firebase Realtime Database
+// 1. Simpan/Sync Otomatis ke Firebase Realtime Database
 window.syncAbandonedCartToFirebase = async function() {
   if (!window.app || !window.app.cartStore) return;
   const items = window.app.cartStore.items;
@@ -2622,14 +2570,77 @@ window.syncAbandonedCartToFirebase = async function() {
         updatedAt: new Date().toISOString(),
         status: "abandoned"
       });
-      console.log("Data berhasil masuk ke Firebase: abandoned_carts/" + user.uid);
+      console.log("Data keranjang tersinkronisasi ke Firebase Database: abandoned_carts/" + user.uid);
     } else {
       await remove(cartRef);
     }
   } catch (err) {
-    console.warn("Gagal simpan ke Firebase:", err);
+    console.warn("Gagal simpan ke Firebase Database:", err);
   }
 };
+
+// 2. Fungsi Kirim Email Pengingat Berdasarkan Data Realtime Database
+async function kirimEmailOtomatisAbandonedCart() {
+  const user = auth.currentUser;
+  
+  if (!user) {
+    console.log("Abandoned Cart Email dilewati: User belum login.");
+    return;
+  }
+
+  if (hasSentAbandonedEmail) {
+    console.log("Email pengingat sudah terkirim untuk sesi ini.");
+    return;
+  }
+
+  // A. Sinkronkan keranjang saat ini ke Realtime Database terlebih dahulu
+  await window.syncAbandonedCartToFirebase();
+
+  // B. Ambil data REALTIME langsung dari node Realtime Database (abandoned_carts/{uid})
+  const cartRef = ref(db, "abandoned_carts/" + user.uid);
+  
+  try {
+    const snapshot = await get(cartRef);
+    
+    if (!snapshot.exists()) {
+      console.log("Tidak ada data keranjang tertinggal di Database.");
+      return;
+    }
+
+    const dbCartData = snapshot.val();
+
+    if (!dbCartData.items || dbCartData.items.length === 0) {
+      return;
+    }
+
+    // C. Format susunan produk dari Database menjadi rincian teks rapi
+    let rincianProdukDatabase = "";
+    dbCartData.items.forEach((item, index) => {
+      const subtotal = item.price * item.qty;
+      rincianProdukDatabase += `${index + 1}. ${item.name}\n   • Jumlah: ${item.qty} Pcs\n   • Harga Satuan: ${formatRupiah(item.price)}\n   • Subtotal: ${formatRupiah(subtotal)}\n\n`;
+    });
+
+    // D. Parameter dinamis yang dikirimkan ke EmailJS (Presisi dengan data Realtime Database)
+    const templateParams = {
+      to_email: dbCartData.email || user.email,
+      to_name: user.displayName || user.email.split('@')[0],
+      cart_items_details: rincianProdukDatabase.trim(),
+      total_price: formatRupiah(dbCartData.totalAmount),
+      updated_at: new Date(dbCartData.updatedAt).toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short' }),
+      checkout_link: window.location.href
+    };
+
+    if (window.emailjs) {
+      console.log("Mengirim email pengingat berdasarkan Realtime Database ke:", templateParams.to_email);
+      await emailjs.send(EMAILJS_SERVICE_ID, ABANDONED_EMAIL_TEMPLATE_ID, templateParams);
+      console.log("SUCCESS: Email Abandoned Cart berbasis Realtime Database berhasil terkirim!");
+      hasSentAbandonedEmail = true; // Tandai agar tidak terkirim ganda
+    }
+
+  } catch (err) {
+    console.error("Gagal mengambil data Realtime Database / Kirim EmailJS:", err);
+  }
+}
 
 // 3. Cek Keranjang Tertinggal Saat User Login
 window.checkAbandonedCartOnLogin = async function(user) {
@@ -2644,7 +2655,7 @@ window.checkAbandonedCartOnLogin = async function(user) {
       }
     }
   } catch (err) {
-    console.warn("Gagal cek abandoned cart:", err);
+    console.warn("Gagal cek abandoned cart dari DB:", err);
   }
 };
 
@@ -2680,7 +2691,7 @@ window.tutupBannerAbandoned = function() {
   if (banner) banner.classList.add("hidden");
 };
 
-// 7. Bersihkan Firebase Saat Checkout Sukses
+// 7. Bersihkan Firebase Database Saat Checkout Sukses
 window.clearAbandonedCartFirebase = async function() {
   const user = auth.currentUser;
   if (window.abandonedInSessionTimer) clearTimeout(window.abandonedInSessionTimer);
@@ -2689,9 +2700,9 @@ window.clearAbandonedCartFirebase = async function() {
   if (!user) return;
   try {
     await remove(ref(db, "abandoned_carts/" + user.uid));
-    console.log("Abandoned cart dibersihkan dari Firebase.");
+    console.log("Data Abandoned cart dibersihkan dari Database.");
   } catch (err) {
-    console.warn("Gagal bersihkan abandoned cart:", err);
+    console.warn("Gagal bersihkan abandoned cart DB:", err);
   }
 };
 
@@ -2705,14 +2716,11 @@ window.startLiveInSessionTimer = function() {
     if (window.app && window.app.cartStore && window.app.cartStore.items.length > 0) {
       const items = window.app.cartStore.items;
       window.abandonedItemsData = items;
-      
-      // A. Simpan ke Firebase Realtime Database
-      await window.syncAbandonedCartToFirebase();
 
-      // B. Tampilkan Banner Notifikasi di Web
+      // Tampilkan Banner di UI Web
       window.tampilkanBannerAbandoned(items.length, window.app.cartStore.getTotal());
 
-      // C. Kirim Email Otomatis via EmailJS (template_k4pjm0o)
+      // Kirim Email Berbasis Realtime Database
       await kirimEmailOtomatisAbandonedCart();
     }
   }, LIVE_ABANDONED_DELAY);
@@ -2723,7 +2731,7 @@ if (window.app && window.app.cartStore) {
   window.app.cartStore.subscribe(() => {
     window.startLiveInSessionTimer();
   });
-    }    
+}
 </script>
 
 </body>
