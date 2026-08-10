@@ -1200,6 +1200,28 @@ window.addEventListener('error', function(e) {
         </div>
     </div>
 
+<!-- 🚨 BANNER NOTIFIKASI ABANDONED CART (KERANJANG TERTINGGAL) -->
+<div id="abandoned-cart-banner" class="fixed bottom-20 left-4 sm:left-6 z-50 hidden max-w-sm bg-white/95 backdrop-blur-md border border-amber-400 rounded-2xl p-4 shadow-2xl animate-bounce">
+    <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center text-xl shrink-0">
+            <i class="fa-solid fa-cart-arrow-down"></i>
+        </div>
+        <div class="flex-1 text-xs">
+            <h4 class="font-extrabold text-afcNavy">Keranjang Belanja Tertinggal!</h4>
+            <p class="text-slate-600 mt-0.5" id="abandoned-cart-text">Anda memiliki item di keranjang yang belum di-checkout. Lanjutkan pemesanan sekarang?</p>
+            <div class="mt-2.5 flex items-center gap-2">
+                <button onclick="bukaKeranjangTertinggal()" class="bg-amber-500 hover:bg-amber-600 text-white font-extrabold px-3.5 py-1.5 rounded-xl text-[11px] shadow-sm transition">
+                    Selesaikan Pesanan
+                </button>
+                <button onclick="tutupBannerAbandoned()" class="text-slate-400 hover:text-slate-600 font-semibold px-2 py-1.5 text-[11px]">
+                    Abaikan
+                </button>
+            </div>
+        </div>
+        <button onclick="tutupBannerAbandoned()" class="text-slate-400 hover:text-slate-600 text-sm font-bold">&times;</button>
+    </div>
+</div>
+    
     <!-- FLOATING SOSIAL MEDIA MELAYANG (YOUTUBE, INSTAGRAM, TIKTOK, WA) -->
     <div class="fixed bottom-6 right-6 z-40 flex flex-col gap-3 items-end">
         <!-- Logo YouTube -->
@@ -2509,6 +2531,133 @@ window.loadPhotoLikes = async function() {
     const authOverlay = document.getElementById("auth-overlay");
     if (authOverlay) authOverlay.style.display = "flex";
   };
+
+    // =========================================================================
+// 🛒 INTEGRASI FIREBASE REALTIME DATABASE: ABANDONED CART SYSTEM
+// =========================================================================
+import { remove } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-database.js";
+
+// Variable penampung item tertinggal
+window.abandonedItemsData = [];
+
+// 1. Fungsi Sinkronisasi Otomatis Keranjang ke Database "abandoned_carts"
+window.syncAbandonedCartToFirebase = async function() {
+  if (!window.app || !window.app.cartStore) return;
+  const items = window.app.cartStore.items;
+  const user = auth.currentUser;
+
+  if (!user) return; // Menyimpan hanya jika user sudah login
+
+  const cartRef = ref(db, "abandoned_carts/" + user.uid);
+
+  try {
+    if (items && items.length > 0) {
+      await set(cartRef, {
+        userId: user.uid,
+        email: user.email,
+        items: items,
+        totalAmount: window.app.cartStore.getTotal(),
+        updatedAt: new Date().toISOString(),
+        status: "abandoned"
+      });
+      console.log("Keranjang berhasil disimpan ke Firebase abandoned_carts");
+    } else {
+      // Jika keranjang kosong, hapus record di Firebase
+      await remove(cartRef);
+    }
+  } catch (err) {
+    console.warn("Gagal sinkronisasi abandoned cart:", err);
+  }
+};
+
+// 2. Cek Keranjang Tertinggal Saat User Login/Buka Halaman
+window.checkAbandonedCartOnLogin = async function(user) {
+  if (!user) return;
+  
+  try {
+    const snapshot = await get(ref(db, "abandoned_carts/" + user.uid));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      if (data.items && data.items.length > 0) {
+        window.abandonedItemsData = data.items;
+        
+        // Tampilkan Banner Notifikasi setelah 1.5 detik
+        setTimeout(() => {
+          const banner = document.getElementById("abandoned-cart-banner");
+          const textEl = document.getElementById("abandoned-cart-text");
+          if (banner) {
+            if (textEl) {
+              textEl.innerText = `Anda memiliki ${data.items.length} produk (${SecurityUtils.formatRupiah(data.totalAmount)}) yang belum selesai di-checkout.`;
+            }
+            banner.classList.remove("hidden");
+          }
+        }, 1500);
+      }
+    }
+  } catch (err) {
+    console.warn("Gagal mengecek abandoned cart:", err);
+  }
+};
+
+// 3. Fungsi Buka Keranjang dari Banner
+window.bukaKeranjangTertinggal = function() {
+  if (window.abandonedItemsData && window.abandonedItemsData.length > 0) {
+    // Muat ulang item ke cartStore jika keranjang lokal saat ini kosong
+    if (window.app.cartStore.items.length === 0) {
+      window.abandonedItemsData.forEach(item => {
+        window.app.cartStore.items.push(item);
+      });
+      window.app.cartStore.notify();
+    }
+  }
+  
+  // Buka Drawer Keranjang
+  window.app.cartController.toggleDrawer(true);
+  window.tutupBannerAbandoned();
+};
+
+// 4. Fungsi Tutup Banner
+window.tutupBannerAbandoned = function() {
+  const banner = document.getElementById("abandoned-cart-banner");
+  if (banner) banner.classList.add("hidden");
+};
+
+// 5. Hapus Abandoned Cart Saat Pemesanan/Checkout Berhasil
+window.clearAbandonedCartFirebase = async function() {
+  const user = auth.currentUser;
+  if (!user) return;
+  try {
+    await remove(ref(db, "abandoned_carts/" + user.uid));
+    console.log("Abandoned cart berhasil dibersihkan setelah checkout.");
+  } catch (err) {
+    console.warn("Gagal menghapus abandoned cart:", err);
+  }
+};
+
+// =========================================================================
+// HOOKS INTEGRASI DENGAN APLIKASI
+// =========================================================================
+
+// Hook 1: Jalankan pemicu simpan setiap kali keranjang berubah
+if (window.app && window.app.cartStore) {
+  window.app.cartStore.subscribe(() => {
+    window.syncAbandonedCartToFirebase();
+  });
+}
+
+// Hook 2: Hubungkan dengan fungsi Checkout WA (Bersihkan cart saat dibeli)
+const originalProcessCheckout = window.app.cartController.processCheckout;
+window.app.cartController.processCheckout = function(e) {
+  window.clearAbandonedCartFirebase(); // Hapus status abandoned cart
+  return originalProcessCheckout.call(window.app.cartController, e);
+};
+
+// Hook 3: Cek abandoned cart setiap kali Auth state berubah (User masuk)
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    window.checkAbandonedCartOnLogin(user);
+  }
+});
 </script>
 
 </body>
