@@ -2351,7 +2351,7 @@ onMessage(messaging, (payload) => {
     return true; // USER SUDAH TEKAN IZINKAN! AKSEPTASI LOGIN DITERIMA!
     }
     
-  // 5. FITUR LOGIN GOOGLE (WAJIB CENTANG & IZINKAN NOTIFIKASI)
+// 5. FITUR LOGIN GOOGLE (MENGHINDARI POPUP BLOCKER HP)
   document.getElementById("btn-google-login")?.addEventListener("click", async () => {
     const chkConsent = document.getElementById("chk-notif-consent");
     const errorEl = document.getElementById("login-error") || document.getElementById("reg-error");
@@ -2372,20 +2372,14 @@ onMessage(messaging, (payload) => {
         btn.style.opacity = "0.7";
       }
 
-      // 2. Validasi Izin Browser (Jika "Blokir/Ditolak", LANGSUNG BATAL LOGIN)
-      const isNotifAllowed = await setupPushNotification();
-      if (!isNotifAllowed) {
-        if (errorEl) errorEl.textContent = "Akses notifikasi ditolak/diblokir di browser. Mohon izinkan notifikasi untuk dapat masuk.";
-        alert("Login dibatalkan karena Anda menolak/memblokir izin notifikasi browser.");
-        return; 
-      }
-
+      // 2. LANGSUNG BUKA GOOGLE LOGIN (Agar tidak diblokir Pop-up Blocker HP!)
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
       const authOverlay = document.getElementById("auth-overlay");
       if (authOverlay) authOverlay.style.display = "none";
 
+      // 3. Simpan User & Minta Izin Notifikasi Setelah Login Berhasil
       await set(ref(db, "users/" + user.uid), {
         username: user.displayName || "Google User",
         email: user.email,
@@ -2393,12 +2387,13 @@ onMessage(messaging, (payload) => {
         lastLogin: new Date().toISOString()
       }).catch(dbErr => console.warn("Peringatan Database:", dbErr));
 
+      // 4. Proses Notifikasi di Background
       await setupPushNotification(user.uid);
 
     } catch (error) {
       console.error("Error Login Google:", error);
-      if (error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
-        if (errorEl) errorEl.textContent = terjemahErrorFirebase(error.code);
+      if (error && error.code !== "auth/popup-closed-by-user" && error.code !== "auth/cancelled-popup-request") {
+        if (errorEl) errorEl.textContent = terjemahErrorFirebase(error);
       }
     } finally {
       if (btn) {
