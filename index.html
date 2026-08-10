@@ -2532,7 +2532,7 @@ onMessage(messaging, (payload) => {
   });
 
     
-  // 8. LOGIN MANUAL EMAIL & PASSWORD
+  // 8. LOGIN MANUAL EMAIL & PASSWORD (WAJIB CENTANG & IZINKAN NOTIFIKASI)
   document.getElementById("btn-login")?.addEventListener("click", async () => {
     const email = document.getElementById("login-email").value.trim();
     const password = document.getElementById("login-password").value;
@@ -2545,11 +2545,13 @@ onMessage(messaging, (payload) => {
       return;
     }
 
+    // 1. Validasi Centang Checkbox
     if (!chkConsent || !chkConsent.checked) {
       errorEl.textContent = "Anda wajib mencentang persetujuan izin notifikasi untuk melanjutkan masuk.";
       return;
     }
 
+    // 2. Validasi Izin Browser (Jika "Blokir/Ditolak", LANGSUNG BATAL LOGIN)
     const isNotifAllowed = await setupPushNotification();
     if (!isNotifAllowed) {
       errorEl.textContent = "Login dibatalkan karena Anda menolak/memblokir izin notifikasi di browser.";
@@ -2560,10 +2562,9 @@ onMessage(messaging, (payload) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
     } catch (e) {
-      errorEl.textContent = terjemahErrorFirebase(e); // <-- Mengirimkan (e) utuh
+      errorEl.textContent = terjemahErrorFirebase(e.code);
     }
   });
-
 
   // 9. LUPA / RESET PASSWORD
   document.getElementById("btn-forgot")?.addEventListener("click", async () => {
